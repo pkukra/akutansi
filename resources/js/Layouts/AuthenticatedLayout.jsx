@@ -2,10 +2,11 @@ import React, { useState, useEffect } from "react";
 import { Link, usePage } from "@inertiajs/react";
 import {
     UserOutlined,
-    CodeOutlined,
+    LineChartOutlined,
     HomeOutlined,
     MonitorOutlined,
     PoweroffOutlined,
+    
 } from "@ant-design/icons";
 import { Layout, Menu } from "antd";
 
@@ -18,36 +19,50 @@ const items = [
         label: <a href={route("dashboard")}>Home</a>,
     },
     {
-        key: "rm-parent", // Untuk `/rm` dan turunannya
-        icon: <CodeOutlined />,
-        label: <a href={route("rm.index")}>RM</a>,
+        key: "akt-parent", // Untuk `/rm` dan turunannya
+        icon: <LineChartOutlined />,
+        label: <a href={route("akt.pendapatan_rajal.index")}>Akutansi</a>,
         children: [
-            {
-                key: "no-rm",
-                label: <a href={route("rm.index")}>By No RM</a>,
-            },
-            {
-                key: "rm/pasien-rujukan/list_rujukan",
-                label: (
-                    <a href={route("rm.pasien-rujukan.list_rujukan")}>
-                        List Rajal
-                    </a>
-                ),
-            },
             {
                 key: "rm-ranap",
                 label: (
-                    <a href={route("rm.pasien-inap.list_inap")}>List Ranap</a>
+                    <a href={route("akt.pendapatan_rajal.index")}>Pendapatan Rajal</a>
                 ),
             },
-            {
-                key: "rm-master-kelengkapan",
-                label: (
-                    <a href={route("rm.icd.index")}>Master Kelengkapan</a>
-                ),
-            },
+            
         ],
     },
+    // {
+    //     key: "rm-parent", // Untuk `/rm` dan turunannya
+    //     icon: <CodeOutlined />,
+    //     label: <a href={route("rm.index")}>RM</a>,
+    //     children: [
+    //         {
+    //             key: "no-rm",
+    //             label: <a href={route("rm.index")}>By No RM</a>,
+    //         },
+    //         {
+    //             key: "rm/pasien-rujukan/list_rujukan",
+    //             label: (
+    //                 <a href={route("rm.pasien-rujukan.list_rujukan")}>
+    //                     List Rajal
+    //                 </a>
+    //             ),
+    //         },
+    //         {
+    //             key: "rm-ranap",
+    //             label: (
+    //                 <a href={route("rm.pasien-inap.list_inap")}>List Ranap</a>
+    //             ),
+    //         },
+    //         {
+    //             key: "rm-master-kelengkapan",
+    //             label: (
+    //                 <a href={route("rm.icd.index")}>Master Kelengkapan</a>
+    //             ),
+    //         },
+    //     ],
+    // },
     {
         key: "casemix", // Untuk `/casemix` dan turunannya
         icon: <MonitorOutlined />,
