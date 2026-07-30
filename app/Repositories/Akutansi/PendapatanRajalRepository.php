@@ -20,11 +20,35 @@ class PendapatanRajalRepository
     ) {
         $baseQuery = DB::connection('sqlsrvsimrs')
             ->table('PASIEN_RUJUKAN')
-            ->join(
+            ->Leftjoin(
                 'TRANSAKSIPASIEN',
                 'TRANSAKSIPASIEN.FTNO_TRANSAKSI',
                 '=',
                 'PASIEN_RUJUKAN.FRPNOTRANSAKSIKJ'
+            )
+            ->Leftjoin(
+                'PASIEN',
+                'PASIEN.KD_PASIEN',
+                '=',
+                'PASIEN_RUJUKAN.FRPPASIEN_ID'
+            )
+            ->Leftjoin(
+                'DOKTER',
+                'DOKTER.FMDDOKTER_ID',
+                '=',
+                'PASIEN_RUJUKAN.FRPDOKTER_ID'
+            )
+            ->Leftjoin(
+                'CUSTOMER',
+                'CUSTOMER.CUSID',
+                '=',
+                'PASIEN_RUJUKAN.FRPCUSTOMER_ID'
+            )
+            ->Leftjoin(
+                'POLIKLINIK',
+                'POLIKLINIK.FMPKLINIK_ID',
+                '=',
+                'PASIEN_RUJUKAN.FRPUNIT'
             )
             ->when($dokter, function ($query, $dokter) {
                 return $query->where('PASIEN_RUJUKAN.FRPDOKTER_ID', $dokter);
@@ -55,6 +79,10 @@ class PendapatanRajalRepository
 
         $data = $baseQuery
             ->select(
+                'POLIKLINIK.FMPKLINIKN',
+                'PASIEN.NAMAPASIEN',
+                'CUSTOMER.NAME AS PENJAMIN',
+                'DOKTER.FMDDOKTERN',
                 'PASIEN_RUJUKAN.*',
                 'TRANSAKSIPASIEN.USERRS as KASIR'
             )

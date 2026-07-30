@@ -42,7 +42,7 @@ export default function Index({ auth, icdData }) {
     };
 
     const [loading, setLoading] = useState(false);
-    const [dataKasir, setDataKasir] = useState(icdData || []);
+    const [dataList, setDataList] = useState(icdData || []);
     const [totalData, setTotalData] = useState(0);
 
     const [PoliFilter, setPoliFilter] = useState(initialPoli);
@@ -62,7 +62,7 @@ export default function Index({ auth, icdData }) {
         return query.toString();
     };
 
-    const fetchDataICD = async (pageVal = page, perPageVal = perPage) => {
+    const fetchDataList = async (pageVal = page, perPageVal = perPage) => {
         setLoading(true);
         try {
             const paramObj = {
@@ -86,8 +86,10 @@ export default function Index({ auth, icdData }) {
                 },
             );
 
-            setDataKasir(response?.data?.data?.data || []);
-            setTotalData(response?.data?.data?.total || 0);
+            console.log(response?.data);
+
+            setDataList(response?.data?.data || []);
+            setTotalData(response?.data?.count || 0);
         } catch (error) {
             console.error("Error fetching data: ", error);
         } finally {
@@ -101,7 +103,7 @@ export default function Index({ auth, icdData }) {
 
         setPage(newPage);
         setPerPage(newPerPage);
-        fetchDataICD(newPage, newPerPage);
+        fetchDataList(newPage, newPerPage);
     };
 
     const handleSearch = () => {
@@ -120,7 +122,7 @@ export default function Index({ auth, icdData }) {
         window.history.replaceState(null, "", `?${queryStr}`);
 
         setPage(1);
-        fetchDataICD(1, perPage);
+        fetchDataList(1, perPage);
     };
 
     const handleReset = () => {
@@ -128,7 +130,7 @@ export default function Index({ auth, icdData }) {
     };
 
     useEffect(() => {
-        fetchDataICD();
+        fetchDataList();
     }, []);
 
     return (
@@ -170,12 +172,12 @@ export default function Index({ auth, icdData }) {
                     </Col>
 
                     <Col span={4}>
-                        <Typography.Text strong>Dokter</Typography.Text>
+                        <Typography.Text strong>Kode Dokter</Typography.Text>
                         <Input
                             allowClear
                             value={DokterFilter}
                             onChange={(e) => setDokterFilter(e.target.value)}
-                            placeholder="Dokter"
+                            placeholder="Kode Dokter"
                         />
                     </Col>
 
@@ -188,32 +190,27 @@ export default function Index({ auth, icdData }) {
                             placeholder="Payer"
                         >
                             <Select.Option value="">Semua</Select.Option>
-                            <Select.Option value="UMUM">UMUM</Select.Option>
+                            {/* <Select.Option value="UMUM">UMUM</Select.Option>
                             <Select.Option value="BPJS">BPJS</Select.Option>
                             <Select.Option value="JR">
                                 Jasa Raharja
                             </Select.Option>
                             <Select.Option value="ASURANSI">
                                 Asuransi Lain
-                            </Select.Option>
+                            </Select.Option> */}
                         </Select>
                     </Col>
 
                     <Col span={4}>
-                        <Typography.Text strong>Poliklinik</Typography.Text>
-                        <Select
-                            style={{ width: "100%" }}
+                        <Typography.Text strong>Kode Poli</Typography.Text>
+                        <Input
+                            allowClear
                             value={PoliFilter}
-                            onChange={(value) => setPoliFilter(value)}
-                            placeholder="Poliklinik"
-                        >
-                            <Select.Option value="">Semua</Select.Option>
-                            <Select.Option value="int">Interna</Select.Option>
-                            <Select.Option value="jant">Jantung</Select.Option>
-                            <Select.Option value="paru">Paru</Select.Option>
-                            <Select.Option value="bedah">Bedah</Select.Option>
-                        </Select>
+                            onChange={(e) => setPoliFilter(e.target.value)}
+                            placeholder="Kode Poli"
+                        />
                     </Col>
+
 
                     <Col span={2}>
                         <Typography.Text>&nbsp;</Typography.Text>
@@ -230,26 +227,73 @@ export default function Index({ auth, icdData }) {
                     </Col>
                 </Row>
 
-                <small>
-                    total data: {totalData}. Page: {page}. Perpage: {perPage}
-                </small>
+                <h3>
+                    Halaman: {page} | Per Halaman: {perPage} | Total data:{" "}
+                    {totalData}.
+                </h3>
 
                 <Table
-                    dataSource={dataKasir}
+                    dataSource={dataList}
                     columns={[
                         {
-                            title: "Kode",
-                            dataIndex: "code",
-                            width: 100,
+                            title: "Tanggal",
+                            dataIndex: "FRPTGL",
+                            width: "10%",
+                            render: (value) =>
+                                value ? dayjs(value).format("DD/MM/YYYY") : "-",
                         },
                         {
-                            title: "Description",
-                            dataIndex: "description",
+                            title: "No RM",
+                            dataIndex: "FRPPASIEN_ID",
+                            align: "left",
+                            width: "60px",
+                        },
+                        {
+                            title: "Nama Pasien",
+                            dataIndex: "NAMAPASIEN",
+                            align: "left",
+                            width: 50,
+                        },
+                        {
+                            title: "Dokter",
+                            dataIndex: "FMDDOKTERN",
+                            align: "left",
+                            width: 50,
+                            render: (_, record) => (
+                                <>
+                                    {record?.FRPDOKTER_ID} -{" "}
+                                    {record?.FMDDOKTERN}
+                                </>
+                            ),
+                        },
+                        {
+                            title: "Penjamin",
+                            dataIndex: "PENJAMIN",
+                            align: "left",
+                            width: 50,
+                        },
+                        {
+                            title: "Poli",
+                            dataIndex: "FMPKLINIKN",
+                            align: "left",
+                            width: 50,
+                            render: (_, record) => (
+                                <>
+                                    {record?.FRPUNIT} -{" "}
+                                    {record?.FMPKLINIKN}
+                                </>
+                            ),
+                        },
+                        {
+                            title: "Kasir",
+                            dataIndex: "KASIR",
+                            align: "left",
+                            width: 50,
                         },
                         {
                             title: "Action",
                             dataIndex: "action",
-                            width: 100,
+                            width: 50,
                             render: (_, record) => (
                                 <></>
                                 // <ModalAlert dataCode={record}>
@@ -260,7 +304,7 @@ export default function Index({ auth, icdData }) {
                     ]}
                     size="small"
                     loading={loading}
-                    rowKey="id"
+                    rowKey="FRPNOTRANSAKSIKJ"
                     pagination={{
                         simple: true,
                         current: page,
