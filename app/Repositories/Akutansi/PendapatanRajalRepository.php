@@ -265,8 +265,8 @@ class PendapatanRajalRepository
             ->select($select)
             ->orderBy('PASIEN_RUJUKAN.FRPTGL', 'desc')
             ->orderBy('PASIEN_RUJUKAN.FRPJAM', 'desc')
-            // ->limit($per_page)
-            // ->offset(($page - 1) * $per_page)
+            ->limit($per_page)
+            ->offset(($page - 1) * $per_page)
             ->get();
 
         return (object) [

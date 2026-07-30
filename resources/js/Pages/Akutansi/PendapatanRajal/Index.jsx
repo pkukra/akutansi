@@ -110,6 +110,7 @@ export default function Index({ auth, icdData }) {
 
         setPage(newPage);
         setPerPage(newPerPage);
+
         fetchDataList(newPage, newPerPage);
     };
 
@@ -571,10 +572,12 @@ export default function Index({ auth, icdData }) {
                     loading={loading}
                     rowKey="FRPNOTRANSAKSIKJ"
                     pagination={{
-                        simple: true,
                         current: page,
                         total: totalData,
                         pageSize: perPage,
+                        showSizeChanger: true,
+                        pageSizeOptions: [10, 25, 50, 100, 250, 500, 1000],
+                        showTotal: (total) => `Total ${total} data`,
                     }}
                     onChange={handleTableChange}
                 />
