@@ -149,6 +149,57 @@ export default function Index({ auth, icdData }) {
         }
     }, []);
 
+    const summary = dataList.reduce(
+        (acc, row) => {
+            const lainnya =
+                Number(row.TOTAL_BIAYA || 0) -
+                Number(row.PENDAFTARAN || 0) -
+                Number(row.JASA_MEDIS || 0) -
+                Number(row.OBAT || 0) -
+                Number(row.RADIOLOGI || 0) -
+                Number(row.LAB || 0);
+
+            acc.totalBiaya += Number(row.TOTAL_BIAYA || 0);
+
+            acc.pendaftaran += Number(row.PENDAFTARAN || 0);
+            acc.jasaMedis += Number(row.JASA_MEDIS || 0);
+            acc.obat += Number(row.OBAT || 0);
+            acc.lab += Number(row.LAB || 0);
+            acc.radiologi += Number(row.RADIOLOGI || 0);
+            acc.lainnya += lainnya;
+
+            acc.kas += Number(row.KAS || 0);
+            acc.bank += Number(row.BANK || 0);
+            acc.piutang += Number(row.PIUTANG || 0);
+
+            return acc;
+        },
+        {
+            totalBiaya: 0,
+
+            pendaftaran: 0,
+            jasaMedis: 0,
+            obat: 0,
+            lab: 0,
+            radiologi: 0,
+            lainnya: 0,
+
+            kas: 0,
+            bank: 0,
+            piutang: 0,
+        },
+    );
+
+    const totalDebet =
+        summary.pendaftaran +
+        summary.jasaMedis +
+        summary.obat +
+        summary.lab +
+        summary.radiologi +
+        summary.lainnya;
+
+    const totalKredit = summary.kas + summary.bank + summary.piutang;
+
     return (
         <AuthenticatedLayout
             user={auth.user}
@@ -250,6 +301,67 @@ export default function Index({ auth, icdData }) {
                         x: 2000,
                         y: scrollY,
                     }}
+                    summary={() => (
+                        <>
+                            {/* SUB TOTAL */}
+                            <Table.Summary.Row>
+                                <Table.Summary.Cell index={0} colSpan={8}>
+                                    <b>SUB TOTAL</b>
+                                </Table.Summary.Cell>
+
+                                <Table.Summary.Cell align="right">
+                                    <b>{RupiahFormat(summary.pendaftaran)}</b>
+                                </Table.Summary.Cell>
+
+                                <Table.Summary.Cell align="right">
+                                    <b>{RupiahFormat(summary.jasaMedis)}</b>
+                                </Table.Summary.Cell>
+
+                                <Table.Summary.Cell align="right">
+                                    <b>{RupiahFormat(summary.obat)}</b>
+                                </Table.Summary.Cell>
+
+                                <Table.Summary.Cell align="right">
+                                    <b>{RupiahFormat(summary.lab)}</b>
+                                </Table.Summary.Cell>
+
+                                <Table.Summary.Cell align="right">
+                                    <b>{RupiahFormat(summary.radiologi)}</b>
+                                </Table.Summary.Cell>
+
+                                <Table.Summary.Cell align="right">
+                                    <b>{RupiahFormat(summary.lainnya)}</b>
+                                </Table.Summary.Cell>
+
+                                <Table.Summary.Cell align="right">
+                                    <b>{RupiahFormat(summary.kas)}</b>
+                                </Table.Summary.Cell>
+
+                                <Table.Summary.Cell align="right">
+                                    <b>{RupiahFormat(summary.bank)}</b>
+                                </Table.Summary.Cell>
+
+                                <Table.Summary.Cell align="right">
+                                    <b>{RupiahFormat(summary.piutang)}</b>
+                                </Table.Summary.Cell>
+                            </Table.Summary.Row>
+
+                            {/* GRAND TOTAL */}
+                            <Table.Summary.Row>
+                                <Table.Summary.Cell index={0} colSpan={8}>
+                                    <b>GRAND TOTAL</b>
+                                </Table.Summary.Cell>
+
+                                <Table.Summary.Cell colSpan={6} align="right">
+                                    <b>Debet : {RupiahFormat(totalDebet)}</b>
+                                </Table.Summary.Cell>
+
+                                <Table.Summary.Cell colSpan={3} align="right">
+                                    <b>Kredit : {RupiahFormat(totalKredit)}</b>
+                                </Table.Summary.Cell>
+                            </Table.Summary.Row>
+                        </>
+                    )}
                     dataSource={dataList}
                     columns={[
                         {
