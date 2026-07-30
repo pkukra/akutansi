@@ -50,6 +50,20 @@ class PendapatanRajalRepository
                 '=',
                 'PASIEN_RUJUKAN.FRPUNIT'
             )
+            ->leftJoin(
+                DB::raw("
+        (
+            SELECT
+                FDTNO_TRANSAKSI,
+                SUM(FDTKREDIT) AS TOTAL_BIAYA
+            FROM TRANSAKSIPASIEND
+            GROUP BY FDTNO_TRANSAKSI
+        ) AS TPD
+    "),
+                'TRANSAKSIPASIEN.FTNO_TRANSAKSI',
+                '=',
+                'TPD.FDTNO_TRANSAKSI'
+            )
             ->when($dokter, function ($query, $dokter) {
                 return $query->where('PASIEN_RUJUKAN.FRPDOKTER_ID', $dokter);
             })
@@ -84,10 +98,11 @@ class PendapatanRajalRepository
                 'CUSTOMER.NAME AS PENJAMIN',
                 'DOKTER.FMDDOKTERN',
                 'PASIEN_RUJUKAN.*',
-                'TRANSAKSIPASIEN.USERRS as KASIR'
+                'TRANSAKSIPASIEN.USERRS as KASIR',
+                DB::raw('ISNULL(TPD.TOTAL_BIAYA, 0) AS TOTAL_BIAYA')
             )
-            ->orderBy('PASIEN_RUJUKAN.FRPTGL', 'desc') // ganti jika PK berbeda
-            ->orderBy('PASIEN_RUJUKAN.FRPJAM', 'desc') // ganti jika PK berbeda
+            ->orderBy('PASIEN_RUJUKAN.FRPTGL', 'desc')
+            ->orderBy('PASIEN_RUJUKAN.FRPJAM', 'desc')
             ->limit($per_page)
             ->offset(($page - 1) * $per_page)
             ->get();

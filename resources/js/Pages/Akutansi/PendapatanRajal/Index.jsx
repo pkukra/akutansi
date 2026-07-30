@@ -17,6 +17,12 @@ const { RangePicker } = DatePicker;
 import axios from "axios";
 import dayjs from "dayjs";
 
+const RupiahFormat = (x) => {
+    const number = Number(x);
+    const formatted = new Intl.NumberFormat("id-ID").format(number);
+    return formatted;
+};
+
 export default function Index({ auth, icdData }) {
     const queryParams = new URLSearchParams(window.location.search);
     const initialPage = parseInt(queryParams.get("page")) || 1;
@@ -211,7 +217,6 @@ export default function Index({ auth, icdData }) {
                         />
                     </Col>
 
-
                     <Col span={2}>
                         <Typography.Text>&nbsp;</Typography.Text>
                         <Button block type="primary" onClick={handleSearch}>
@@ -238,62 +243,87 @@ export default function Index({ auth, icdData }) {
                         {
                             title: "Tanggal",
                             dataIndex: "FRPTGL",
-                            width: "10%",
-                            render: (value) =>
-                                value ? dayjs(value).format("DD/MM/YYYY") : "-",
+                            width: "80px",
+                            render: (value) => (
+                                <small>
+                                    {value
+                                        ? dayjs(value).format("DD/MM/YYYY")
+                                        : "-"}
+                                </small>
+                            ),
                         },
                         {
                             title: "No RM",
                             dataIndex: "FRPPASIEN_ID",
                             align: "left",
-                            width: "60px",
+                            width: "80px",
+                            render: (_, record) => (
+                                <small>{record?.FRPPASIEN_ID}</small>
+                            ),
                         },
                         {
                             title: "Nama Pasien",
                             dataIndex: "NAMAPASIEN",
                             align: "left",
-                            width: 50,
+                            width: "200px",
+                            render: (_, record) => (
+                                <small>{record?.NAMAPASIEN}</small>
+                            ),
                         },
                         {
                             title: "Dokter",
                             dataIndex: "FMDDOKTERN",
                             align: "left",
-                            width: 50,
+                            width: "200px",
                             render: (_, record) => (
-                                <>
+                                <small>
                                     {record?.FRPDOKTER_ID} -{" "}
                                     {record?.FMDDOKTERN}
-                                </>
+                                </small>
                             ),
                         },
                         {
                             title: "Penjamin",
                             dataIndex: "PENJAMIN",
                             align: "left",
-                            width: 50,
+                            width: "100px",
+                            render: (_, record) => (
+                                <small>{record?.PENJAMIN}</small>
+                            ),
                         },
                         {
                             title: "Poli",
                             dataIndex: "FMPKLINIKN",
                             align: "left",
-                            width: 50,
+                            width: "200px",
                             render: (_, record) => (
-                                <>
-                                    {record?.FRPUNIT} -{" "}
-                                    {record?.FMPKLINIKN}
-                                </>
+                                <small>
+                                    {record?.FRPUNIT} - {record?.FMPKLINIKN}
+                                </small>
                             ),
                         },
                         {
                             title: "Kasir",
                             dataIndex: "KASIR",
                             align: "left",
-                            width: 50,
+                            width: "80px",
+                            render: (_, record) => (
+                                <small>{record?.KASIR}</small>
+                            ),
+                        },
+                        {
+                            title: "Total Biaya",
+                            dataIndex: "TOTAL_BIAYA",
+                            align: "right",
+                            render: (_, record) => (
+                                <small>
+                                    {RupiahFormat(record?.TOTAL_BIAYA)}
+                                </small>
+                            ),
                         },
                         {
                             title: "Action",
                             dataIndex: "action",
-                            width: 50,
                             render: (_, record) => (
                                 <></>
                                 // <ModalAlert dataCode={record}>
