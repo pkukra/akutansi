@@ -158,21 +158,14 @@ class PendapatanRajalRepository
                 DB::raw("
                 (
                     SELECT
-
                         TPD.FDTNO_TRANSAKSI,
-
                         SUM(TPD.FDTDEBET) AS TOTAL_BIAYA,
-
                         $kategoriSql
-
                     FROM TRANSAKSIPASIEND TPD
-
                     INNER JOIN PRODUK P
                         ON P.FMPPRODUK_ID = TPD.FDTKD_PRODUK
-
                     GROUP BY
                         TPD.FDTNO_TRANSAKSI
-
                 ) TPD
             "),
                 'TRANSAKSIPASIEN.FTNO_TRANSAKSI',
@@ -184,19 +177,13 @@ class PendapatanRajalRepository
                 DB::raw("
                 (
                     SELECT
-
                         TPD.FDTNO_TRANSAKSI,
-
                         $pembayaranSql
-
                     FROM TRANSAKSIPASIEND TPD
-
                     INNER JOIN PRODUK P
                         ON P.FMPPRODUK_ID = TPD.FDTKD_PRODUK
-
                     GROUP BY
                         TPD.FDTNO_TRANSAKSI
-
                 ) TPK
                 "),
                 'TRANSAKSIPASIEN.FTNO_TRANSAKSI',
