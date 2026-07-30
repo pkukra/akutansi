@@ -47,6 +47,7 @@ export default function Index({ auth, icdData }) {
         return current && current.endOf("day").isAfter(dayjs());
     };
 
+    const [scrollY, setScrollY] = useState(400); // default scroll height
     const [loading, setLoading] = useState(false);
     const [dataList, setDataList] = useState(icdData || []);
     const [totalData, setTotalData] = useState(0);
@@ -139,6 +140,15 @@ export default function Index({ auth, icdData }) {
         fetchDataList();
     }, []);
 
+    useEffect(() => {
+        const screenWidth = window.innerWidth;
+        if (screenWidth > 1280) {
+            setScrollY(600); // Untuk layar besar
+        } else {
+            setScrollY(390); // Untuk layar kecil
+        }
+    }, []);
+
     return (
         <AuthenticatedLayout
             user={auth.user}
@@ -188,23 +198,21 @@ export default function Index({ auth, icdData }) {
                     </Col>
 
                     <Col span={4}>
-                        <Typography.Text strong>Payer</Typography.Text>
-                        <Select
+                        <Typography.Text strong>Payor</Typography.Text>
+                        <Input
+                            allowClear
+                            value={PayorFilter}
+                            onChange={(e) => setPayorFilter(e.target.value)}
+                            placeholder="Kode Payor"
+                        />
+                        {/* <Select
                             style={{ width: "100%" }}
                             value={PayorFilter}
                             onChange={(value) => setPayorFilter(value)}
-                            placeholder="Payer"
+                            placeholder="Payor"
                         >
                             <Select.Option value="">Semua</Select.Option>
-                            {/* <Select.Option value="UMUM">UMUM</Select.Option>
-                            <Select.Option value="BPJS">BPJS</Select.Option>
-                            <Select.Option value="JR">
-                                Jasa Raharja
-                            </Select.Option>
-                            <Select.Option value="ASURANSI">
-                                Asuransi Lain
-                            </Select.Option> */}
-                        </Select>
+                        </Select> */}
                     </Col>
 
                     <Col span={4}>
@@ -238,12 +246,17 @@ export default function Index({ auth, icdData }) {
                 </h3>
 
                 <Table
+                    scroll={{
+                        x: 2000,
+                        y: scrollY,
+                    }}
                     dataSource={dataList}
                     columns={[
                         {
                             title: "Tanggal",
                             dataIndex: "FRPTGL",
                             width: "80px",
+                            fixed: "left",
                             render: (value) => (
                                 <small>
                                     {value
@@ -256,9 +269,13 @@ export default function Index({ auth, icdData }) {
                             title: "No RM",
                             dataIndex: "FRPPASIEN_ID",
                             align: "left",
-                            width: "80px",
+                            width: "120px",
+                            fixed: "left",
                             render: (_, record) => (
-                                <small>{record?.FRPPASIEN_ID}</small>
+                                <small>
+                                    {record?.FRPPASIEN_ID} <br />{" "}
+                                    {record?.FRPNOTRANSAKSIKJ}
+                                </small>
                             ),
                         },
                         {
@@ -266,6 +283,7 @@ export default function Index({ auth, icdData }) {
                             dataIndex: "NAMAPASIEN",
                             align: "left",
                             width: "200px",
+                            fixed: "left",
                             render: (_, record) => (
                                 <small>{record?.NAMAPASIEN}</small>
                             ),
@@ -286,9 +304,12 @@ export default function Index({ auth, icdData }) {
                             title: "Penjamin",
                             dataIndex: "PENJAMIN",
                             align: "left",
-                            width: "100px",
+                            width: "120px",
                             render: (_, record) => (
-                                <small>{record?.PENJAMIN}</small>
+                                <small>
+                                    {record?.FRPCUSTOMER_ID} -{" "}
+                                    {record?.PENJAMIN}
+                                </small>
                             ),
                         },
                         {
@@ -315,6 +336,7 @@ export default function Index({ auth, icdData }) {
                             title: "Total Biaya",
                             dataIndex: "TOTAL_BIAYA",
                             align: "right",
+                            width: "200px",
                             render: (_, record) => (
                                 <small>
                                     {RupiahFormat(record?.TOTAL_BIAYA)}
@@ -322,14 +344,115 @@ export default function Index({ auth, icdData }) {
                             ),
                         },
                         {
-                            title: "Action",
-                            dataIndex: "action",
-                            render: (_, record) => (
-                                <></>
-                                // <ModalAlert dataCode={record}>
-                                //     Tampilkan
-                                // </ModalAlert>
-                            ),
+                            title: "Debet",
+                            children: [
+                                {
+                                    title: "Pendaftaran",
+                                    align: "right",
+                                    width: 120,
+                                    render: (_, record) => (
+                                        <small>
+                                            {RupiahFormat(record.PENDAFTARAN)}
+                                        </small>
+                                    ),
+                                },
+                                {
+                                    title: "Jasa Medis",
+                                    align: "right",
+                                    width: 120,
+                                    render: (_, record) => (
+                                        <small>
+                                            {RupiahFormat(record.JASA_MEDIS)}
+                                        </small>
+                                    ),
+                                },
+                                {
+                                    title: "Obat",
+                                    align: "right",
+                                    width: 120,
+                                    render: (_, record) => (
+                                        <small>
+                                            {RupiahFormat(record.OBAT)}
+                                        </small>
+                                    ),
+                                },
+                                {
+                                    title: "Lab",
+                                    align: "right",
+                                    width: 120,
+                                    render: (_, record) => (
+                                        <small>
+                                            {RupiahFormat(record.LAB)}
+                                        </small>
+                                    ),
+                                },
+                                {
+                                    title: "Radiologi",
+                                    align: "right",
+                                    width: 120,
+                                    render: (_, record) => (
+                                        <small>
+                                            {RupiahFormat(record.RADIOLOGI)}
+                                        </small>
+                                    ),
+                                },
+                                {
+                                    title: "Lainnya",
+                                    align: "right",
+                                    width: 120,
+                                    render: (_, record) => {
+                                        const lainnya =
+                                            Number(record.TOTAL_BIAYA || 0) -
+                                            Number(record.PENDAFTARAN || 0) -
+                                            Number(record.JASA_MEDIS || 0) -
+                                            Number(record.OBAT || 0) -
+                                            Number(record.RADIOLOGI || 0) -
+                                            Number(record.LAB || 0);
+
+                                        return (
+                                            <small>
+                                                {RupiahFormat(lainnya)}
+                                            </small>
+                                        );
+                                    },
+                                },
+                            ],
+                        },
+
+                        {
+                            title: "Kredit",
+                            children: [
+                                {
+                                    title: "Kas",
+                                    align: "right",
+                                    width: 120,
+                                    render: (_, record) => (
+                                        <small>
+                                            {RupiahFormat(record.KAS)}
+                                        </small>
+                                    ),
+                                },
+                                {
+                                    title: "Bank",
+                                    align: "right",
+                                    width: 120,
+                                    render: (_, record) => (
+                                        <small>
+                                            {RupiahFormat(record.BANK)}
+                                        </small>
+                                    ),
+                                },
+                                {
+                                    title: "Piutang",
+                                    align: "right",
+                                    width: 120,
+                                    render: (_, record) => (
+                                        <small>
+                                            {RupiahFormat(record.PIUTANG)}
+                                        </small>
+                                    ),
+                                },
+                            ],
                         },
                     ]}
                     size="small"
