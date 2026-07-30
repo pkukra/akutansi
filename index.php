@@ -1,3 +1,3 @@
 <?php
-header("Location: /pku-laravel/public/");
+header("Location: /akutansi/public/");
 exit();
