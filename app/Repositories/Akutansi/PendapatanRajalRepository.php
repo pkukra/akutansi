@@ -55,10 +55,12 @@ class PendapatanRajalRepository
             'BANK' => [
                 '111.2010',
                 '111.2020',
+                '112.1100 ',
             ],
 
             'PIUTANG' => [
                 '112.1200',
+                '112.3100',
             ],
         ];
 
