@@ -457,7 +457,7 @@ export default function Index({ auth, icdData }) {
                             ),
                         },
                         {
-                            title: "Debet",
+                            title: "Kredit",
                             children: [
                                 {
                                     title: "Pendaftaran",
@@ -533,7 +533,7 @@ export default function Index({ auth, icdData }) {
                         },
 
                         {
-                            title: "Kredit",
+                            title: "Debet",
                             children: [
                                 {
                                     title: "Kas",
