@@ -86,11 +86,18 @@ class PendapatanRajalRepository
             ) AS $alias
         ";
 
-            $kategoriSelect[] = DB::raw("ISNULL(TPD.$alias,0) AS $alias");
+            $kategoriSelect[] = DB::raw(
+                "ISNULL(TPD.$alias,0) AS $alias"
+            );
         }
 
         $kategoriSql = implode(",\n", $kategoriSql);
 
+        /*
+    |--------------------------------------------------------------------------
+    | Generate pembayaran
+    |--------------------------------------------------------------------------
+    */
         $pembayaranSql = [];
         $pembayaranSelect = [];
 
@@ -99,28 +106,35 @@ class PendapatanRajalRepository
             $coa = "'" . implode("','", $coaList) . "'";
 
             $pembayaranSql[] = "
-                SUM(
-                    CASE
-                        WHEN P.COA_RJ_UMUM IN ($coa)
-                        THEN TPD.FDTKREDIT
-                        ELSE 0
-                    END
-                ) AS $alias
-            ";
+            SUM(
+                CASE
+                    WHEN P.COA_RJ_UMUM IN ($coa)
+                    THEN TPD.FDTKREDIT
+                    ELSE 0
+                END
+            ) AS $alias
+        ";
 
-            $pembayaranSelect[] = DB::raw("ISNULL(TPK.$alias,0) AS $alias");
+            $pembayaranSelect[] = DB::raw(
+                "ISNULL(TPK.$alias,0) AS $alias"
+            );
         }
 
         $pembayaranSql = implode(",\n", $pembayaranSql);
 
         /*
     |--------------------------------------------------------------------------
-    | Query
+    | Base Query
     |--------------------------------------------------------------------------
     */
         $baseQuery = DB::connection('sqlsrvsimrs')
             ->table('PASIEN_RUJUKAN')
 
+            /*
+        |--------------------------------------------------------------------------
+        | TRANSAKSIPASIEN
+        |--------------------------------------------------------------------------
+        */
             ->leftJoin(
                 'TRANSAKSIPASIEN',
                 'TRANSAKSIPASIEN.FTNO_TRANSAKSI',
@@ -128,6 +142,11 @@ class PendapatanRajalRepository
                 'PASIEN_RUJUKAN.FRPNOTRANSAKSIKJ'
             )
 
+            /*
+        |--------------------------------------------------------------------------
+        | PASIEN
+        |--------------------------------------------------------------------------
+        */
             ->leftJoin(
                 'PASIEN',
                 'PASIEN.KD_PASIEN',
@@ -135,6 +154,11 @@ class PendapatanRajalRepository
                 'PASIEN_RUJUKAN.FRPPASIEN_ID'
             )
 
+            /*
+        |--------------------------------------------------------------------------
+        | DOKTER
+        |--------------------------------------------------------------------------
+        */
             ->leftJoin(
                 'DOKTER',
                 'DOKTER.FMDDOKTER_ID',
@@ -142,6 +166,11 @@ class PendapatanRajalRepository
                 'PASIEN_RUJUKAN.FRPDOKTER_ID'
             )
 
+            /*
+        |--------------------------------------------------------------------------
+        | CUSTOMER / PENJAMIN
+        |--------------------------------------------------------------------------
+        */
             ->leftJoin(
                 'CUSTOMER',
                 'CUSTOMER.CUSID',
@@ -149,6 +178,11 @@ class PendapatanRajalRepository
                 'PASIEN_RUJUKAN.FRPCUSTOMER_ID'
             )
 
+            /*
+        |--------------------------------------------------------------------------
+        | POLIKLINIK
+        |--------------------------------------------------------------------------
+        */
             ->leftJoin(
                 'POLIKLINIK',
                 'POLIKLINIK.FMPKLINIK_ID',
@@ -156,6 +190,11 @@ class PendapatanRajalRepository
                 'PASIEN_RUJUKAN.FRPUNIT'
             )
 
+            /*
+        |--------------------------------------------------------------------------
+        | Total biaya + kategori produk
+        |--------------------------------------------------------------------------
+        */
             ->leftJoin(
                 DB::raw("
                 (
@@ -174,7 +213,12 @@ class PendapatanRajalRepository
                 '=',
                 'TPD.FDTNO_TRANSAKSI'
             )
-            // left join pembayaran
+
+            /*
+        |--------------------------------------------------------------------------
+        | Pembayaran
+        |--------------------------------------------------------------------------
+        */
             ->leftJoin(
                 DB::raw("
                 (
@@ -187,53 +231,146 @@ class PendapatanRajalRepository
                     GROUP BY
                         TPD.FDTNO_TRANSAKSI
                 ) TPK
-                "),
+            "),
                 'TRANSAKSIPASIEN.FTNO_TRANSAKSI',
                 '=',
                 'TPK.FDTNO_TRANSAKSI'
             )
 
+            /*
+        |--------------------------------------------------------------------------
+        | Filter dokter
+        |--------------------------------------------------------------------------
+        */
             ->when($dokter, function ($query, $dokter) {
-                return $query->where('PASIEN_RUJUKAN.FRPDOKTER_ID', $dokter);
+                return $query->where(
+                    'PASIEN_RUJUKAN.FRPDOKTER_ID',
+                    $dokter
+                );
             })
 
+            /*
+        |--------------------------------------------------------------------------
+        | Filter poli
+        |--------------------------------------------------------------------------
+        */
             ->when($poli, function ($query, $poli) {
-                return $query->where('PASIEN_RUJUKAN.FRPUNIT', $poli);
+                return $query->where(
+                    'PASIEN_RUJUKAN.FRPUNIT',
+                    $poli
+                );
             })
 
+            /*
+        |--------------------------------------------------------------------------
+        | Filter payor
+        |--------------------------------------------------------------------------
+        */
             ->when($payor, function ($query, $payor) {
-                return $query->where('PASIEN_RUJUKAN.FRPCUSTOMER_ID', $payor);
+                return $query->where(
+                    'PASIEN_RUJUKAN.FRPCUSTOMER_ID',
+                    $payor
+                );
             })
 
+            /*
+        |--------------------------------------------------------------------------
+        | Filter kasir
+        |--------------------------------------------------------------------------
+        */
             ->when($kasir, function ($query, $kasir) {
-                return $query->where('TRANSAKSIPASIEN.USERRS', $kasir);
-            })
-
-            ->when($tanggal_awal && $tanggal_akhir, function ($query) use ($tanggal_awal, $tanggal_akhir) {
-                return $query->whereBetween(
-                    'PASIEN_RUJUKAN.FRPTGL',
-                    [$tanggal_awal, $tanggal_akhir]
+                return $query->where(
+                    'TRANSAKSIPASIEN.USERRS',
+                    $kasir
                 );
             })
 
-            ->when($tanggal_awal && !$tanggal_akhir, function ($query) use ($tanggal_awal) {
-                return $query->whereDate(
-                    'PASIEN_RUJUKAN.FRPTGL',
-                    '>=',
-                    $tanggal_awal
-                );
-            })
+            /*
+        |--------------------------------------------------------------------------
+        | Filter tanggal: tanggal awal dan akhir
+        |--------------------------------------------------------------------------
+        */
+            ->when(
+                $tanggal_awal && $tanggal_akhir,
+                function ($query) use ($tanggal_awal, $tanggal_akhir) {
 
-            ->when(!$tanggal_awal && $tanggal_akhir, function ($query) use ($tanggal_akhir) {
-                return $query->whereDate(
-                    'PASIEN_RUJUKAN.FRPTGL',
-                    '<=',
-                    $tanggal_akhir
-                );
+                    return $query->whereBetween(
+                        'PASIEN_RUJUKAN.FRPTGL',
+                        [$tanggal_awal, $tanggal_akhir]
+                    );
+                }
+            )
+
+            /*
+        |--------------------------------------------------------------------------
+        | Filter tanggal: hanya tanggal awal
+        |--------------------------------------------------------------------------
+        */
+            ->when(
+                $tanggal_awal && !$tanggal_akhir,
+                function ($query) use ($tanggal_awal) {
+
+                    return $query->whereDate(
+                        'PASIEN_RUJUKAN.FRPTGL',
+                        '>=',
+                        $tanggal_awal
+                    );
+                }
+            )
+
+            /*
+        |--------------------------------------------------------------------------
+        | Filter tanggal: hanya tanggal akhir
+        |--------------------------------------------------------------------------
+        */
+            ->when(
+                !$tanggal_awal && $tanggal_akhir,
+                function ($query) use ($tanggal_akhir) {
+
+                    return $query->whereDate(
+                        'PASIEN_RUJUKAN.FRPTGL',
+                        '<=',
+                        $tanggal_akhir
+                    );
+                }
+            )
+
+            /*
+        |--------------------------------------------------------------------------
+        | EXCLUDE TRANSAKSI YANG SUDAH MASUK RANAP
+        |--------------------------------------------------------------------------
+        |
+        | Jika:
+        |
+        | TRANSAKSIPASIEN.FTNO_TRANSAKSI
+        | sama dengan
+        | TRANSAKSIPASIENINAPD.FDTNO_FAKTUR
+        |
+        | maka transaksi tersebut tidak ditampilkan.
+        |--------------------------------------------------------------------------
+        */
+            ->whereNotExists(function ($query) {
+
+                $query->select(DB::raw(1))
+                    ->from('TRANSAKSIPASIENINAPD')
+                    ->whereColumn(
+                        'TRANSAKSIPASIENINAPD.FDTNO_FAKTUR',
+                        'TRANSAKSIPASIEN.FTNO_TRANSAKSI'
+                    );
             });
 
+        /*
+    |--------------------------------------------------------------------------
+    | Total
+    |--------------------------------------------------------------------------
+    */
         $total = (clone $baseQuery)->count();
 
+        /*
+    |--------------------------------------------------------------------------
+    | Select
+    |--------------------------------------------------------------------------
+    */
         $select = [
             'POLIKLINIK.FMPKLINIKN',
             'PASIEN.NAMAPASIEN',
@@ -241,7 +378,10 @@ class PendapatanRajalRepository
             'DOKTER.FMDDOKTERN',
             'PASIEN_RUJUKAN.*',
             'TRANSAKSIPASIEN.USERRS AS KASIR',
-            DB::raw('ISNULL(TPD.TOTAL_BIAYA,0) AS TOTAL_BIAYA'),
+
+            DB::raw(
+                'ISNULL(TPD.TOTAL_BIAYA,0) AS TOTAL_BIAYA'
+            ),
         ];
 
         $select = array_merge(
@@ -250,14 +390,37 @@ class PendapatanRajalRepository
             $pembayaranSelect
         );
 
+        /*
+    |--------------------------------------------------------------------------
+    | Data
+    |--------------------------------------------------------------------------
+    */
         $data = $baseQuery
             ->select($select)
-            ->orderBy('PASIEN_RUJUKAN.FRPTGL', 'desc')
-            ->orderBy('PASIEN_RUJUKAN.FRPJAM', 'desc')
+
+            ->orderBy(
+                'PASIEN_RUJUKAN.FRPTGL',
+                'desc'
+            )
+
+            ->orderBy(
+                'PASIEN_RUJUKAN.FRPJAM',
+                'desc'
+            )
+
             ->limit($per_page)
-            ->offset(($page - 1) * $per_page)
+
+            ->offset(
+                ($page - 1) * $per_page
+            )
+
             ->get();
 
+        /*
+    |--------------------------------------------------------------------------
+    | Return
+    |--------------------------------------------------------------------------
+    */
         return (object) [
             'total' => $total,
             'data'  => $data,
