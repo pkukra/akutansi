@@ -277,6 +277,10 @@ export default function Index({ auth }) {
             groupedArray.forEach((item, index) => {
                 result.push({
                     key: `${transaksiIndex}-detail-${index}`,
+                    customerId:
+                        transaksi?.FRPCUSTOMER_ID || "",
+                    pasienId:
+                        transaksi?.FRPPASIEN_ID || "",
 
                     tanggal:
                         transaksi?.TANGGAL ||
@@ -298,6 +302,7 @@ export default function Index({ auth }) {
                     transaksiIndex: transaksiIndex,
 
                     firstRow: index === 0,
+                    seccondRow: index === 1,
 
                     isTotalRow: false,
                 });
@@ -327,6 +332,7 @@ export default function Index({ auth }) {
                 transaksiIndex: transaksiIndex,
 
                 firstRow: false,
+                seccondRow: false,
 
                 isTotalRow: true,
             });
@@ -364,7 +370,11 @@ export default function Index({ auth }) {
             width: 120,
 
             render: (value, record) =>
-                record.firstRow ? value : "",
+                record.firstRow ? (
+                    <small>{value}</small>
+                ) : (
+                    ""
+                ),
         },
 
         {
@@ -373,8 +383,29 @@ export default function Index({ auth }) {
             key: "noBukti",
             width: 180,
 
-            render: (value, record) =>
-                record.firstRow ? value : "",
+            render: (value, record) => {
+                if (record.firstRow) {
+                    return (
+                        <small>
+                            {value} / {record?.pasienId}
+                        </small>
+                    );
+                }
+
+                if (record.isTotalRow) {
+                    return "";
+                }
+
+                if (record.seccondRow) {
+                    return (
+                        <small>
+                            {record.customerId || ""}
+                        </small>
+                    );
+                }
+
+                return "";
+            },
         },
 
         {
@@ -382,6 +413,10 @@ export default function Index({ auth }) {
             dataIndex: "kodeAkun",
             key: "kodeAkun",
             width: 120,
+
+            render: (value) => (
+                <small>{value}</small>
+            ),
         },
 
         {
@@ -392,9 +427,11 @@ export default function Index({ auth }) {
 
             render: (value, record) =>
                 record.isTotalRow ? (
-                    <strong>TOTAL</strong>
+                    <small>
+                        <strong>TOTAL</strong>
+                    </small>
                 ) : (
-                    value
+                    <small>{value}</small>
                 ),
         },
 
@@ -406,7 +443,7 @@ export default function Index({ auth }) {
 
             render: (value, record) => {
                 if (!record.isTotalRow) {
-                    return value;
+                    return <small>{value}</small>;
                 }
 
                 const debit = Number(record.debit || 0);
@@ -414,22 +451,25 @@ export default function Index({ auth }) {
 
                 if (debit === kredit) {
                     return (
-                        <strong style={{ color: "#52c41a" }}>
-                            ✓ Balance
-                        </strong>
+                        <small>
+                            <strong style={{ color: "#52c41a" }}>
+                                ✓ Balance
+                            </strong>
+                        </small>
                     );
                 }
 
                 return (
-                    <strong style={{ color: "#ff4d4f" }}>
-                        ⚠ Tidak Balance
-                        {" ("}
-                        Selisih:{" "}
-                        {RupiahFormat(
-                            Math.abs(debit - kredit)
-                        )}
-                        {")"}
-                    </strong>
+                    <small>
+                        <strong style={{ color: "#ff4d4f" }}>
+                            ⚠ Tidak Balance (
+                            Selisih:{" "}
+                            {RupiahFormat(
+                                Math.abs(debit - kredit)
+                            )}
+                            )
+                        </strong>
+                    </small>
                 );
             },
         },
@@ -443,15 +483,19 @@ export default function Index({ auth }) {
 
             render: (value, record) =>
                 record.isTotalRow ? (
-                    <strong>
+                    <small>
+                        <strong>
+                            {Number(value || 0) > 0
+                                ? RupiahFormat(value)
+                                : ""}
+                        </strong>
+                    </small>
+                ) : (
+                    <small>
                         {Number(value || 0) > 0
                             ? RupiahFormat(value)
                             : ""}
-                    </strong>
-                ) : (
-                    Number(value || 0) > 0
-                        ? RupiahFormat(value)
-                        : ""
+                    </small>
                 ),
         },
 
@@ -464,15 +508,19 @@ export default function Index({ auth }) {
 
             render: (value, record) =>
                 record.isTotalRow ? (
-                    <strong>
+                    <small>
+                        <strong>
+                            {Number(value || 0) > 0
+                                ? RupiahFormat(value)
+                                : ""}
+                        </strong>
+                    </small>
+                ) : (
+                    <small>
                         {Number(value || 0) > 0
                             ? RupiahFormat(value)
                             : ""}
-                    </strong>
-                ) : (
-                    Number(value || 0) > 0
-                        ? RupiahFormat(value)
-                        : ""
+                    </small>
                 ),
         },
     ];
