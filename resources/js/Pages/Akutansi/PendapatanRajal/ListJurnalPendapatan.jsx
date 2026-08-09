@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import { Head } from "@inertiajs/react";
 import {
@@ -12,6 +12,7 @@ import {
 } from "antd";
 const { RangePicker } = DatePicker;
 
+import "./ListJurnalPendapatan.css";
 import axios from "axios";
 import dayjs from "dayjs";
 
@@ -27,15 +28,21 @@ export default function Index({ auth }) {
     // =========================================================
     // PARAM INIT
     // =========================================================
-    const queryParams = new URLSearchParams(window.location.search);
+    const queryParams = new URLSearchParams(
+        window.location.search
+    );
 
-    const initialPage = parseInt(queryParams.get("page")) || 1;
+    const initialPage =
+        parseInt(queryParams.get("page")) || 1;
+
     const initialPerPage =
         parseInt(queryParams.get("per_page")) || 100;
 
     const initialTanggalAwal =
         queryParams.get("tanggal_awal") ||
-        dayjs().subtract(6, "day").format("YYYY-MM-DD");
+        dayjs()
+            .subtract(6, "day")
+            .format("YYYY-MM-DD");
 
     const initialTanggalAkhir =
         queryParams.get("tanggal_akhir") ||
@@ -45,17 +52,24 @@ export default function Index({ auth }) {
     // STATE
     // =========================================================
     const [page, setPage] = useState(initialPage);
-    const [perPage, setPerPage] = useState(initialPerPage);
 
-    const [loading, setLoading] = useState(false);
+    const [perPage, setPerPage] =
+        useState(initialPerPage);
 
-    const [dataList, setDataList] = useState([]);
-    const [totalData, setTotalData] = useState(0);
+    const [loading, setLoading] =
+        useState(false);
 
-    const [tanggalRange, setTanggalRange] = useState([
-        dayjs(initialTanggalAwal),
-        dayjs(initialTanggalAkhir),
-    ]);
+    const [dataList, setDataList] =
+        useState([]);
+
+    const [totalData, setTotalData] =
+        useState(0);
+
+    const [tanggalRange, setTanggalRange] =
+        useState([
+            dayjs(initialTanggalAwal),
+            dayjs(initialTanggalAkhir),
+        ]);
 
     // =========================================================
     // BUILD QUERY PARAMS
@@ -63,15 +77,17 @@ export default function Index({ auth }) {
     const buildQueryParams = (params) => {
         const query = new URLSearchParams();
 
-        Object.entries(params).forEach(([key, value]) => {
-            if (
-                value !== null &&
-                value !== "" &&
-                value !== undefined
-            ) {
-                query.set(key, value);
+        Object.entries(params).forEach(
+            ([key, value]) => {
+                if (
+                    value !== null &&
+                    value !== "" &&
+                    value !== undefined
+                ) {
+                    query.set(key, value);
+                }
             }
-        });
+        );
 
         return query.toString();
     };
@@ -94,12 +110,17 @@ export default function Index({ auth }) {
             page: 1,
             per_page: perPage,
             tanggal_awal:
-                tanggalRange?.[0]?.format("YYYY-MM-DD"),
+                tanggalRange?.[0]?.format(
+                    "YYYY-MM-DD"
+                ),
             tanggal_akhir:
-                tanggalRange?.[1]?.format("YYYY-MM-DD"),
+                tanggalRange?.[1]?.format(
+                    "YYYY-MM-DD"
+                ),
         };
 
-        const queryStr = buildQueryParams(paramObj);
+        const queryStr =
+            buildQueryParams(paramObj);
 
         window.history.replaceState(
             null,
@@ -126,12 +147,17 @@ export default function Index({ auth }) {
                 page: pageVal,
                 per_page: perPageVal,
                 tanggal_awal:
-                    tanggalRange?.[0]?.format("YYYY-MM-DD"),
+                    tanggalRange?.[0]?.format(
+                        "YYYY-MM-DD"
+                    ),
                 tanggal_akhir:
-                    tanggalRange?.[1]?.format("YYYY-MM-DD"),
+                    tanggalRange?.[1]?.format(
+                        "YYYY-MM-DD"
+                    ),
             };
 
-            const queryStr = buildQueryParams(paramObj);
+            const queryStr =
+                buildQueryParams(paramObj);
 
             window.history.replaceState(
                 null,
@@ -139,18 +165,23 @@ export default function Index({ auth }) {
                 `?${queryStr}`
             );
 
-            const response = await axios.get(
-                route(
-                    "akt.pendapatan_rajal_jurnal_data"
-                ),
-                {
-                    params: paramObj,
-                }
+            const response =
+                await axios.get(
+                    route(
+                        "akt.pendapatan_rajal_jurnal_data"
+                    ),
+                    {
+                        params: paramObj,
+                    }
+                );
+
+            console.log(
+                response?.data
             );
 
-            console.log("Response:", response?.data);
-
-            setDataList(response?.data?.data || []);
+            setDataList(
+                response?.data?.data || []
+            );
 
             setTotalData(
                 response?.data?.count || 0
@@ -177,132 +208,160 @@ export default function Index({ auth }) {
     };
 
     // =========================================================
-    // BENTUK DATA JURNAL
+    // BENTUK JURNAL
     // =========================================================
-    //
-    // Contoh:
-    //
-    // 411.2103 = 75.000
-    // 411.2111 = 20.000
-    // 411.2113 = 14.800
-    // 411.2113 = 44.100
-    //
-    // akan menjadi:
-    //
-    // 411.2103 = 75.000
-    // 411.2111 = 20.000
-    // 411.2113 = 58.900
-    //
-    // =========================================================
-    const jurnalData = React.useMemo(() => {
-        const grouped = {};
+    const jurnalData = useMemo(() => {
+        const result = [];
 
-        dataList.forEach((transaksi) => {
+        dataList.forEach((transaksi, transaksiIndex) => {
             const details = transaksi?.details || [];
+
+            // Group COA di dalam transaksi yang sama
+            const grouped = {};
 
             details.forEach((detail) => {
                 const coa = detail?.COA || "";
 
-                /*
-                 * Jika COA kosong dan transaksi KR,
-                 * kita jadikan sebagai akun penerimaan.
-                 */
-                const groupKey =
+                // COA kosong untuk transaksi KR
+                const key =
                     coa ||
-                    `PENERIMAAN_${detail?.FDTJENISTRANSAKSI}`;
+                    `KR_${transaksiIndex}`;
 
-                if (!grouped[groupKey]) {
-                    grouped[groupKey] = {
-                        key: groupKey,
-                        coa: coa || "-",
+                if (!grouped[key]) {
+                    grouped[key] = {
+                        coa: coa,
                         account:
                             detail?.ACCOUNT_DESCRIPTION ||
-                            (detail?.FDTJENISTRANSAKSI ===
-                                "KR"
+                            (detail?.FDTJENISTRANSAKSI === "KR"
                                 ? "Penerimaan Pendapatan RJ"
-                                : "-"),
-                        keterangan:
-                            detail?.FDTJENISTRANSAKSI ===
-                                "KR"
-                                ? "Penerimaan pendapatan RJ harian"
-                                : "",
-                        debet: 0,
+                                : ""),
+                        debit: 0,
                         kredit: 0,
                     };
                 }
 
-                grouped[groupKey].debet += Number(
+                grouped[key].debit += Number(
                     detail?.FDTDEBET || 0
                 );
 
-                grouped[groupKey].kredit += Number(
+                grouped[key].kredit += Number(
                     detail?.FDTKREDIT || 0
                 );
             });
+
+            const groupedArray = Object.values(grouped);
+
+            groupedArray.forEach((item, index) => {
+                result.push({
+                    key: `${transaksiIndex}-${index}`,
+                    tanggal:
+                        transaksi?.TANGGAL ||
+                        transaksi?.tanggal ||
+                        transaksi?.TGL ||
+                        tanggalRange?.[0]?.format(
+                            "YYYY-MM-DD"
+                        ),
+
+                    noBukti:
+                        transaksi?.FRPNOTRANSAKSIKJ || "",
+                    kodeAkun: item.coa || "",
+                    namaAkun: item.account || "",
+                    debit: item.debit,
+                    kredit: item.kredit,
+                    // nomor kelompok transaksi
+                    transaksiIndex: transaksiIndex,
+                    // baris pertama transaksi
+                    firstRow: index === 0,
+                });
+            });
         });
 
-        return Object.values(grouped);
-    }, [dataList]);
+        return result;
+    }, [dataList, tanggalRange]);
 
     // =========================================================
     // TOTAL
     // =========================================================
-    const totalDebet = jurnalData.reduce(
+    const totalDebit = jurnalData.reduce(
         (total, item) =>
-            total + Number(item.debet || 0),
+            total +
+            Number(item.debit || 0),
         0
     );
 
-    const totalKredit = jurnalData.reduce(
-        (total, item) =>
-            total + Number(item.kredit || 0),
-        0
-    );
+    const totalKredit =
+        jurnalData.reduce(
+            (total, item) =>
+                total +
+                Number(item.kredit || 0),
+            0
+        );
 
     // =========================================================
     // TABLE COLUMNS
     // =========================================================
     const columns = [
         {
-            title: "COA",
-            dataIndex: "coa",
-            key: "coa",
+            title: "Tanggal",
+            dataIndex: "tanggal",
+            key: "tanggal",
+            width: 120,
+            render: (value, record) =>
+                record.firstRow ? value : "",
+        },
+
+        {
+            title: "No. Bukti Jurnal",
+            dataIndex: "noBukti",
+            key: "noBukti",
+            width: 180,
+            render: (value, record) =>
+                record.firstRow ? value : "",
+        },
+
+        {
+            title: "Kode Akun",
+            dataIndex: "kodeAkun",
+            key: "kodeAkun",
             width: 120,
         },
+
         {
-            title: "Account",
-            dataIndex: "account",
-            key: "account",
-            width: 250,
+            title: "Nama Akun",
+            dataIndex: "namaAkun",
+            key: "namaAkun",
+            width: 280,
         },
+
         {
             title: "Keterangan",
             dataIndex: "keterangan",
             key: "keterangan",
+            width: 300,
         },
+
         {
-            title: "Debet",
-            dataIndex: "debet",
-            key: "debet",
+            title: "Debit (Rp)",
+            dataIndex: "debit",
+            key: "debit",
             width: 160,
             align: "right",
-            render: (value) => {
-                return value > 0
+            render: (value) =>
+                Number(value || 0) > 0
                     ? RupiahFormat(value)
-                    : "";
-            },
+                    : "",
         },
+
         {
-            title: "Kredit",
+            title: "Kredit (Rp)",
             dataIndex: "kredit",
             key: "kredit",
             width: 160,
             align: "right",
-            render: (value) => {
-                return value > 0
+            render: (value) =>
+                Number(value || 0) > 0
                     ? RupiahFormat(value)
-                    : "";
-            },
+                    : "",
         },
     ];
 
@@ -313,15 +372,20 @@ export default function Index({ auth }) {
         <AuthenticatedLayout
             user={auth.user}
             header={
-                <p>Jurnal Pendapatan Rawat Jalan</p>
+                <p>
+                    Jurnal Pendapatan
+                    Rawat Jalan
+                </p>
             }
         >
             <Head title="Jurnal Pendapatan Rawat Jalan" />
 
             <Card>
+
                 {/* =====================================================
                     FILTER
                 ====================================================== */}
+
                 <Row
                     gutter={16}
                     style={{
@@ -338,20 +402,28 @@ export default function Index({ auth }) {
                             style={{
                                 width: "100%",
                             }}
-                            value={tanggalRange}
+                            value={
+                                tanggalRange
+                            }
                             format="YYYY-MM-DD"
                             disabledDate={
                                 disableFutureDate
                             }
-                            onChange={(dates) => {
-                                if (!dates) {
-                                    setTanggalRange([
-                                        dayjs().subtract(
-                                            6,
-                                            "day"
-                                        ),
-                                        dayjs(),
-                                    ]);
+                            onChange={(
+                                dates
+                            ) => {
+                                if (
+                                    !dates
+                                ) {
+                                    setTanggalRange(
+                                        [
+                                            dayjs().subtract(
+                                                6,
+                                                "day"
+                                            ),
+                                            dayjs(),
+                                        ]
+                                    );
 
                                     return;
                                 }
@@ -371,8 +443,12 @@ export default function Index({ auth }) {
                         <Button
                             block
                             type="primary"
-                            onClick={handleSearch}
-                            size={formSize}
+                            onClick={
+                                handleSearch
+                            }
+                            size={
+                                formSize
+                            }
                         >
                             Cari
                         </Button>
@@ -385,8 +461,12 @@ export default function Index({ auth }) {
 
                         <Button
                             block
-                            onClick={handleReset}
-                            size={formSize}
+                            onClick={
+                                handleReset
+                            }
+                            size={
+                                formSize
+                            }
                         >
                             Reset
                         </Button>
@@ -396,32 +476,43 @@ export default function Index({ auth }) {
                 {/* =====================================================
                     INFO
                 ====================================================== */}
-                <div
-                    style={{
-                        marginBottom: 10,
-                    }}
-                >
-                    <Typography.Text>
-                        Halaman: {page} | Per Halaman:{" "}
-                        {perPage} | Total data:{" "}
-                        {totalData}
-                    </Typography.Text>
-                </div>
+
+                <p>
+                    Halaman: {page} |
+                    Per Halaman:{" "}
+                    {perPage} | Total
+                    data:{" "}
+                    {totalData}.
+                </p>
 
                 {/* =====================================================
-                    JURNAL
+                    TABLE JURNAL
                 ====================================================== */}
+
                 <Table
                     bordered
                     size="small"
-                    loading={loading}
-                    columns={columns}
-                    dataSource={jurnalData}
-                    pagination={false}
+                    loading={
+                        loading
+                    }
+                    columns={
+                        columns
+                    }
+                    dataSource={
+                        jurnalData
+                    }
+                    pagination={
+                        false
+                    }
                     rowKey="key"
                     scroll={{
-                        x: 900,
+                        x: 1300,
                     }}
+                    rowClassName={(record) =>
+                        record.transaksiIndex % 2 === 0
+                            ? "jurnal-row-even"
+                            : "jurnal-row-odd"
+                    }
                     summary={() => (
                         <Table.Summary.Row>
                             <Table.Summary.Cell
@@ -430,11 +521,7 @@ export default function Index({ auth }) {
 
                             <Table.Summary.Cell
                                 index={1}
-                            >
-                                <strong>
-                                    TOTAL
-                                </strong>
-                            </Table.Summary.Cell>
+                            />
 
                             <Table.Summary.Cell
                                 index={2}
@@ -442,17 +529,29 @@ export default function Index({ auth }) {
 
                             <Table.Summary.Cell
                                 index={3}
+                            />
+
+                            <Table.Summary.Cell
+                                index={4}
+                            >
+                                <strong>
+                                    TOTAL
+                                </strong>
+                            </Table.Summary.Cell>
+
+                            <Table.Summary.Cell
+                                index={5}
                                 align="right"
                             >
                                 <strong>
                                     {RupiahFormat(
-                                        totalDebet
+                                        totalDebit
                                     )}
                                 </strong>
                             </Table.Summary.Cell>
 
                             <Table.Summary.Cell
-                                index={4}
+                                index={6}
                                 align="right"
                             >
                                 <strong>
@@ -466,24 +565,26 @@ export default function Index({ auth }) {
                 />
 
                 {/* =====================================================
-                    STATUS BALANCE
+                    BALANCE
                 ====================================================== */}
+
                 <div
                     style={{
                         marginTop: 12,
-                        textAlign: "right",
+                        textAlign:
+                            "right",
                     }}
                 >
                     <Typography.Text
                         strong
                         type={
-                            totalDebet ===
+                            totalDebit ===
                                 totalKredit
                                 ? "success"
                                 : "danger"
                         }
                     >
-                        {totalDebet ===
+                        {totalDebit ===
                             totalKredit
                             ? "✓ Jurnal Balance"
                             : "⚠ Jurnal Tidak Balance"}

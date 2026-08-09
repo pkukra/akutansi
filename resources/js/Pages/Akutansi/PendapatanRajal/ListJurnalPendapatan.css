@@ -1,0 +1,12 @@
+.jurnal-row-even>td {
+    background: #ffffff !important;
+}
+
+.jurnal-row-odd>td {
+    background: #f5f5f5 !important;
+}
+
+.jurnal-row-even:hover>td,
+.jurnal-row-odd:hover>td {
+    background: #e6f4ff !important;
+}
