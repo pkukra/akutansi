@@ -10,8 +10,10 @@ import {
     Input,
     Select,
     Typography,
-    DatePicker,
+    DatePicker, Grid
 } from "antd";
+
+const { useBreakpoint } = Grid;
 const { RangePicker } = DatePicker;
 
 import axios from "axios";
@@ -24,6 +26,11 @@ const RupiahFormat = (x) => {
 };
 
 export default function Index({ auth }) {
+
+    const screens = useBreakpoint();
+    const formSize = screens.xxl ? "middle" : "small";
+    const scrollY = screens.xxl ? 600 : 400;
+
     const queryParams = new URLSearchParams(window.location.search);
     const initialPage = parseInt(queryParams.get("page")) || 1;
     const initialPerPage = parseInt(queryParams.get("per_page")) || 100;
@@ -47,7 +54,7 @@ export default function Index({ auth }) {
         return current && current.endOf("day").isAfter(dayjs());
     };
 
-    const [scrollY, setScrollY] = useState(400); // default scroll height
+    // const [scrollY, setScrollY] = useState(400); // default scroll height
     const [loading, setLoading] = useState(false);
     const [dataList, setDataList] = useState([]);
     const [totalData, setTotalData] = useState(0);
@@ -141,14 +148,14 @@ export default function Index({ auth }) {
         fetchDataList();
     }, []);
 
-    useEffect(() => {
-        const screenWidth = window.innerWidth;
-        if (screenWidth > 1280) {
-            setScrollY(600); // Untuk layar besar
-        } else {
-            setScrollY(390); // Untuk layar kecil
-        }
-    }, []);
+    // useEffect(() => {
+    //     const screenWidth = window.innerWidth;
+    //     if (screenWidth > 1280) {
+    //         setScrollY(600); // Untuk layar besar
+    //     } else {
+    //         setScrollY(390); // Untuk layar kecil
+    //     }
+    // }, []);
 
     const summary = dataList.reduce(
         (acc, row) => {
@@ -207,11 +214,12 @@ export default function Index({ auth }) {
             header={<p>Laporan Pendapatan Rajal</p>}
         >
             <Head title="Laporan Pendapatan Rajal" />
-            <Card title="Laporan Pendapatan Rajal" style={{ marginBottom: 5 }}>
+            <Card size={formSize} title="Laporan Pendapatan Rajal">
                 <Row gutter={16} style={{ marginBottom: 10 }}>
                     <Col span={4}>
                         <Typography.Text strong>Tanggal</Typography.Text>
                         <RangePicker
+                            size={formSize}
                             style={{ width: "100%" }}
                             value={tanggalRange}
                             format="YYYY-MM-DD"
@@ -232,6 +240,7 @@ export default function Index({ auth }) {
                     <Col span={3}>
                         <Typography.Text strong>Kasir</Typography.Text>
                         <Input
+                            size={formSize}
                             allowClear
                             value={KasirFilter}
                             onChange={(e) => setKasirFilter(e.target.value)}
@@ -242,6 +251,7 @@ export default function Index({ auth }) {
                     <Col span={4}>
                         <Typography.Text strong>Kode Dokter</Typography.Text>
                         <Input
+                            size={formSize}
                             allowClear
                             value={DokterFilter}
                             onChange={(e) => setDokterFilter(e.target.value)}
@@ -252,6 +262,7 @@ export default function Index({ auth }) {
                     <Col span={4}>
                         <Typography.Text strong>Payor</Typography.Text>
                         <Input
+                            size={formSize}
                             allowClear
                             value={PayorFilter}
                             onChange={(e) => setPayorFilter(e.target.value)}
@@ -270,6 +281,7 @@ export default function Index({ auth }) {
                     <Col span={4}>
                         <Typography.Text strong>Kode Poli</Typography.Text>
                         <Input
+                            size={formSize}
                             allowClear
                             value={PoliFilter}
                             onChange={(e) => setPoliFilter(e.target.value)}
@@ -279,23 +291,27 @@ export default function Index({ auth }) {
 
                     <Col span={2}>
                         <Typography.Text>&nbsp;</Typography.Text>
-                        <Button block type="primary" onClick={handleSearch}>
+                        <Button block type="primary" onClick={handleSearch}
+                            size={formSize}
+                        >
                             Cari
                         </Button>
                     </Col>
 
                     <Col span={2}>
                         <Typography.Text>&nbsp;</Typography.Text>
-                        <Button block onClick={handleReset}>
+                        <Button block onClick={handleReset}
+                            size={formSize}
+                        >
                             Reset
                         </Button>
                     </Col>
                 </Row>
 
-                <h3>
+                <p>
                     Halaman: {page} | Per Halaman: {perPage} | Total data:{" "}
                     {totalData}.
-                </h3>
+                </p>
 
                 <Table
                     scroll={{
