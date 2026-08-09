@@ -60,4 +60,9 @@ class PendapatanRajalController extends Controller
             'count' => $data->total,
         ]);
     }
+
+    public function pendapatan_rajal_jurnal_index()
+    {
+        return Inertia::render('Akutansi/PendapatanRajal/ListJurnalPendapatan');
+    }
 }

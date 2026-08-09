@@ -21,12 +21,18 @@ const items = [
     {
         key: "akt-parent", // Untuk `/rm` dan turunannya
         icon: <LineChartOutlined />,
-        label: <a href={route("akt.pendapatan_rajal.index")}>Akutansi</a>,
+        label: <a href={'#'}>Akutansi</a>,
         children: [
             {
-                key: "rm-ranap",
+                key: "akt.pendapatan_rajal.index",
                 label: (
                     <a href={route("akt.pendapatan_rajal.index")}>Pendapatan Rajal</a>
+                ),
+            },
+            {
+                key: "akt.pendapatan_rajal_jurnal_index.index",
+                label: (
+                    <a href={route("akt.pendapatan_rajal_jurnal_index.index")}>Jurnal Pendapatan Rajal</a>
                 ),
             },
             

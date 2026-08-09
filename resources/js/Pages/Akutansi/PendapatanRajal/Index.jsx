@@ -23,7 +23,7 @@ const RupiahFormat = (x) => {
     return formatted;
 };
 
-export default function Index({ auth, icdData }) {
+export default function Index({ auth }) {
     const queryParams = new URLSearchParams(window.location.search);
     const initialPage = parseInt(queryParams.get("page")) || 1;
     const initialPerPage = parseInt(queryParams.get("per_page")) || 100;
@@ -49,7 +49,7 @@ export default function Index({ auth, icdData }) {
 
     const [scrollY, setScrollY] = useState(400); // default scroll height
     const [loading, setLoading] = useState(false);
-    const [dataList, setDataList] = useState(icdData || []);
+    const [dataList, setDataList] = useState([]);
     const [totalData, setTotalData] = useState(0);
 
     const [PoliFilter, setPoliFilter] = useState(initialPoli);
