@@ -208,6 +208,211 @@ export default function Index({ auth }) {
 
     const totalKredit = summary.kas + summary.bank + summary.piutang;
 
+    const columns = [
+        {
+            title: "Tanggal",
+            dataIndex: "FRPTGL",
+            width: "80px",
+            fixed: "left",
+            render: (value) => (
+                <small>
+                    {value
+                        ? dayjs(value).format("DD/MM/YYYY")
+                        : "-"}
+                </small>
+            ),
+        },
+        {
+            title: "No RM",
+            dataIndex: "FRPPASIEN_ID",
+            align: "left",
+            width: "120px",
+            fixed: "left",
+            render: (_, record) => (
+                <small>
+                    {record?.FRPPASIEN_ID} <br />{" "}
+                    {record?.FRPNOTRANSAKSIKJ}
+                </small>
+            ),
+        },
+        {
+            title: "Nama Pasien",
+            dataIndex: "NAMAPASIEN",
+            align: "left",
+            width: "200px",
+            fixed: "left",
+            render: (_, record) => (
+                <small>{record?.NAMAPASIEN}</small>
+            ),
+        },
+        {
+            title: "Dokter",
+            dataIndex: "FMDDOKTERN",
+            align: "left",
+            width: "200px",
+            render: (_, record) => (
+                <small>
+                    {record?.FRPDOKTER_ID} -{" "}
+                    {record?.FMDDOKTERN}
+                </small>
+            ),
+        },
+        {
+            title: "Penjamin",
+            dataIndex: "PENJAMIN",
+            align: "left",
+            width: "120px",
+            render: (_, record) => (
+                <small>
+                    {record?.FRPCUSTOMER_ID} -{" "}
+                    {record?.PENJAMIN}
+                </small>
+            ),
+        },
+        {
+            title: "Poli",
+            dataIndex: "FMPKLINIKN",
+            align: "left",
+            width: "200px",
+            render: (_, record) => (
+                <small>
+                    {record?.FRPUNIT} - {record?.FMPKLINIKN}
+                </small>
+            ),
+        },
+        {
+            title: "Kasir",
+            dataIndex: "KASIR",
+            align: "left",
+            width: "80px",
+            render: (_, record) => (
+                <small>{record?.KASIR}</small>
+            ),
+        },
+        {
+            title: "Total Biaya",
+            dataIndex: "TOTAL_BIAYA",
+            align: "right",
+            width: "200px",
+            render: (_, record) => (
+                <small>
+                    {RupiahFormat(record?.TOTAL_BIAYA)}
+                </small>
+            ),
+        },
+        {
+            title: "Kredit",
+            children: [
+                {
+                    title: "Pendaftaran",
+                    align: "right",
+                    width: 120,
+                    render: (_, record) => (
+                        <small>
+                            {RupiahFormat(record.PENDAFTARAN)}
+                        </small>
+                    ),
+                },
+                {
+                    title: "Jasa Medis",
+                    align: "right",
+                    width: 120,
+                    render: (_, record) => (
+                        <small>
+                            {RupiahFormat(record.JASA_MEDIS)}
+                        </small>
+                    ),
+                },
+                {
+                    title: "Obat",
+                    align: "right",
+                    width: 120,
+                    render: (_, record) => (
+                        <small>
+                            {RupiahFormat(record.OBAT)}
+                        </small>
+                    ),
+                },
+                {
+                    title: "Lab",
+                    align: "right",
+                    width: 120,
+                    render: (_, record) => (
+                        <small>
+                            {RupiahFormat(record.LAB)}
+                        </small>
+                    ),
+                },
+                {
+                    title: "Radiologi",
+                    align: "right",
+                    width: 120,
+                    render: (_, record) => (
+                        <small>
+                            {RupiahFormat(record.RADIOLOGI)}
+                        </small>
+                    ),
+                },
+                {
+                    title: "Lainnya",
+                    align: "right",
+                    width: 120,
+                    render: (_, record) => {
+                        const lainnya =
+                            Number(record.TOTAL_BIAYA || 0) -
+                            Number(record.PENDAFTARAN || 0) -
+                            Number(record.JASA_MEDIS || 0) -
+                            Number(record.OBAT || 0) -
+                            Number(record.RADIOLOGI || 0) -
+                            Number(record.LAB || 0);
+
+                        return (
+                            <small>
+                                {RupiahFormat(lainnya)}
+                            </small>
+                        );
+                    },
+                },
+            ],
+        },
+
+        {
+            title: "Debet",
+            children: [
+                {
+                    title: "Kas",
+                    align: "right",
+                    width: 120,
+                    render: (_, record) => (
+                        <small>
+                            {RupiahFormat(record.KAS)}
+                        </small>
+                    ),
+                },
+                {
+                    title: "Bank",
+                    align: "right",
+                    width: 120,
+                    render: (_, record) => (
+                        <small>
+                            {RupiahFormat(record.BANK)}
+                        </small>
+                    ),
+                },
+                {
+                    title: "Piutang",
+                    align: "right",
+                    width: 120,
+                    render: (_, record) => (
+                        <small>
+                            {RupiahFormat(record.PIUTANG)}
+                        </small>
+                    ),
+                },
+            ],
+        },
+    ]
+
     return (
         <AuthenticatedLayout
             user={auth.user}
@@ -318,272 +523,8 @@ export default function Index({ auth }) {
                         x: 2000,
                         y: scrollY,
                     }}
-                    summary={() => (
-                        <>
-                            {/* SUB TOTAL */}
-                            <Table.Summary.Row>
-                                <Table.Summary.Cell index={0} colSpan={8}>
-                                    <b>SUB TOTAL</b>
-                                </Table.Summary.Cell>
-
-                                <Table.Summary.Cell align="right">
-                                    <b>{RupiahFormat(summary.pendaftaran)}</b>
-                                </Table.Summary.Cell>
-
-                                <Table.Summary.Cell align="right">
-                                    <b>{RupiahFormat(summary.jasaMedis)}</b>
-                                </Table.Summary.Cell>
-
-                                <Table.Summary.Cell align="right">
-                                    <b>{RupiahFormat(summary.obat)}</b>
-                                </Table.Summary.Cell>
-
-                                <Table.Summary.Cell align="right">
-                                    <b>{RupiahFormat(summary.lab)}</b>
-                                </Table.Summary.Cell>
-
-                                <Table.Summary.Cell align="right">
-                                    <b>{RupiahFormat(summary.radiologi)}</b>
-                                </Table.Summary.Cell>
-
-                                <Table.Summary.Cell align="right">
-                                    <b>{RupiahFormat(summary.lainnya)}</b>
-                                </Table.Summary.Cell>
-
-                                <Table.Summary.Cell align="right">
-                                    <b>{RupiahFormat(summary.kas)}</b>
-                                </Table.Summary.Cell>
-
-                                <Table.Summary.Cell align="right">
-                                    <b>{RupiahFormat(summary.bank)}</b>
-                                </Table.Summary.Cell>
-
-                                <Table.Summary.Cell align="right">
-                                    <b>{RupiahFormat(summary.piutang)}</b>
-                                </Table.Summary.Cell>
-                            </Table.Summary.Row>
-
-                            {/* GRAND TOTAL */}
-                            <Table.Summary.Row>
-                                <Table.Summary.Cell index={0} colSpan={8}>
-                                    <b>GRAND TOTAL</b>
-                                </Table.Summary.Cell>
-
-                                <Table.Summary.Cell colSpan={6} align="right">
-                                    <b>Debet : {RupiahFormat(totalDebet)}</b>
-                                </Table.Summary.Cell>
-
-                                <Table.Summary.Cell colSpan={3} align="right">
-                                    <b>Kredit : {RupiahFormat(totalKredit)}</b>
-                                </Table.Summary.Cell>
-                            </Table.Summary.Row>
-                        </>
-                    )}
                     dataSource={dataList}
-                    columns={[
-                        {
-                            title: "Tanggal",
-                            dataIndex: "FRPTGL",
-                            width: "80px",
-                            fixed: "left",
-                            render: (value) => (
-                                <small>
-                                    {value
-                                        ? dayjs(value).format("DD/MM/YYYY")
-                                        : "-"}
-                                </small>
-                            ),
-                        },
-                        {
-                            title: "No RM",
-                            dataIndex: "FRPPASIEN_ID",
-                            align: "left",
-                            width: "120px",
-                            fixed: "left",
-                            render: (_, record) => (
-                                <small>
-                                    {record?.FRPPASIEN_ID} <br />{" "}
-                                    {record?.FRPNOTRANSAKSIKJ}
-                                </small>
-                            ),
-                        },
-                        {
-                            title: "Nama Pasien",
-                            dataIndex: "NAMAPASIEN",
-                            align: "left",
-                            width: "200px",
-                            fixed: "left",
-                            render: (_, record) => (
-                                <small>{record?.NAMAPASIEN}</small>
-                            ),
-                        },
-                        {
-                            title: "Dokter",
-                            dataIndex: "FMDDOKTERN",
-                            align: "left",
-                            width: "200px",
-                            render: (_, record) => (
-                                <small>
-                                    {record?.FRPDOKTER_ID} -{" "}
-                                    {record?.FMDDOKTERN}
-                                </small>
-                            ),
-                        },
-                        {
-                            title: "Penjamin",
-                            dataIndex: "PENJAMIN",
-                            align: "left",
-                            width: "120px",
-                            render: (_, record) => (
-                                <small>
-                                    {record?.FRPCUSTOMER_ID} -{" "}
-                                    {record?.PENJAMIN}
-                                </small>
-                            ),
-                        },
-                        {
-                            title: "Poli",
-                            dataIndex: "FMPKLINIKN",
-                            align: "left",
-                            width: "200px",
-                            render: (_, record) => (
-                                <small>
-                                    {record?.FRPUNIT} - {record?.FMPKLINIKN}
-                                </small>
-                            ),
-                        },
-                        {
-                            title: "Kasir",
-                            dataIndex: "KASIR",
-                            align: "left",
-                            width: "80px",
-                            render: (_, record) => (
-                                <small>{record?.KASIR}</small>
-                            ),
-                        },
-                        {
-                            title: "Total Biaya",
-                            dataIndex: "TOTAL_BIAYA",
-                            align: "right",
-                            width: "200px",
-                            render: (_, record) => (
-                                <small>
-                                    {RupiahFormat(record?.TOTAL_BIAYA)}
-                                </small>
-                            ),
-                        },
-                        {
-                            title: "Kredit",
-                            children: [
-                                {
-                                    title: "Pendaftaran",
-                                    align: "right",
-                                    width: 120,
-                                    render: (_, record) => (
-                                        <small>
-                                            {RupiahFormat(record.PENDAFTARAN)}
-                                        </small>
-                                    ),
-                                },
-                                {
-                                    title: "Jasa Medis",
-                                    align: "right",
-                                    width: 120,
-                                    render: (_, record) => (
-                                        <small>
-                                            {RupiahFormat(record.JASA_MEDIS)}
-                                        </small>
-                                    ),
-                                },
-                                {
-                                    title: "Obat",
-                                    align: "right",
-                                    width: 120,
-                                    render: (_, record) => (
-                                        <small>
-                                            {RupiahFormat(record.OBAT)}
-                                        </small>
-                                    ),
-                                },
-                                {
-                                    title: "Lab",
-                                    align: "right",
-                                    width: 120,
-                                    render: (_, record) => (
-                                        <small>
-                                            {RupiahFormat(record.LAB)}
-                                        </small>
-                                    ),
-                                },
-                                {
-                                    title: "Radiologi",
-                                    align: "right",
-                                    width: 120,
-                                    render: (_, record) => (
-                                        <small>
-                                            {RupiahFormat(record.RADIOLOGI)}
-                                        </small>
-                                    ),
-                                },
-                                {
-                                    title: "Lainnya",
-                                    align: "right",
-                                    width: 120,
-                                    render: (_, record) => {
-                                        const lainnya =
-                                            Number(record.TOTAL_BIAYA || 0) -
-                                            Number(record.PENDAFTARAN || 0) -
-                                            Number(record.JASA_MEDIS || 0) -
-                                            Number(record.OBAT || 0) -
-                                            Number(record.RADIOLOGI || 0) -
-                                            Number(record.LAB || 0);
-
-                                        return (
-                                            <small>
-                                                {RupiahFormat(lainnya)}
-                                            </small>
-                                        );
-                                    },
-                                },
-                            ],
-                        },
-
-                        {
-                            title: "Debet",
-                            children: [
-                                {
-                                    title: "Kas",
-                                    align: "right",
-                                    width: 120,
-                                    render: (_, record) => (
-                                        <small>
-                                            {RupiahFormat(record.KAS)}
-                                        </small>
-                                    ),
-                                },
-                                {
-                                    title: "Bank",
-                                    align: "right",
-                                    width: 120,
-                                    render: (_, record) => (
-                                        <small>
-                                            {RupiahFormat(record.BANK)}
-                                        </small>
-                                    ),
-                                },
-                                {
-                                    title: "Piutang",
-                                    align: "right",
-                                    width: 120,
-                                    render: (_, record) => (
-                                        <small>
-                                            {RupiahFormat(record.PIUTANG)}
-                                        </small>
-                                    ),
-                                },
-                            ],
-                        },
-                    ]}
+                    columns={columns}
                     size="small"
                     loading={loading}
                     rowKey="FRPNOTRANSAKSIKJ"
@@ -596,6 +537,87 @@ export default function Index({ auth }) {
                         showTotal: (total) => `Total ${total} data`,
                     }}
                     onChange={handleTableChange}
+                    summary={() => (
+                        <Table.Summary>
+                            {/* SUB TOTAL */}
+                            <Table.Summary.Row>
+                                <Table.Summary.Cell index={0}>
+                                    <b>SUB TOTAL</b>
+                                </Table.Summary.Cell>
+
+                                <Table.Summary.Cell index={1} />
+                                <Table.Summary.Cell index={2} />
+                                <Table.Summary.Cell index={3} />
+                                <Table.Summary.Cell index={4} />
+                                <Table.Summary.Cell index={5} />
+                                <Table.Summary.Cell index={6} />
+                                <Table.Summary.Cell index={7} />
+
+                                <Table.Summary.Cell index={8} align="right">
+                                    <b>{RupiahFormat(summary.pendaftaran)}</b>
+                                </Table.Summary.Cell>
+
+                                <Table.Summary.Cell index={9} align="right">
+                                    <b>{RupiahFormat(summary.jasaMedis)}</b>
+                                </Table.Summary.Cell>
+
+                                <Table.Summary.Cell index={10} align="right">
+                                    <b>{RupiahFormat(summary.obat)}</b>
+                                </Table.Summary.Cell>
+
+                                <Table.Summary.Cell index={11} align="right">
+                                    <b>{RupiahFormat(summary.lab)}</b>
+                                </Table.Summary.Cell>
+
+                                <Table.Summary.Cell index={12} align="right">
+                                    <b>{RupiahFormat(summary.radiologi)}</b>
+                                </Table.Summary.Cell>
+
+                                <Table.Summary.Cell index={13} align="right">
+                                    <b>{RupiahFormat(summary.lainnya)}</b>
+                                </Table.Summary.Cell>
+
+                                <Table.Summary.Cell index={14} align="right">
+                                    <b>{RupiahFormat(summary.kas)}</b>
+                                </Table.Summary.Cell>
+
+                                <Table.Summary.Cell index={15} align="right">
+                                    <b>{RupiahFormat(summary.bank)}</b>
+                                </Table.Summary.Cell>
+
+                                <Table.Summary.Cell index={16} align="right">
+                                    <b>{RupiahFormat(summary.piutang)}</b>
+                                </Table.Summary.Cell>
+                            </Table.Summary.Row>
+
+                            {/* GRAND TOTAL */}
+                            <Table.Summary.Row>
+                                <Table.Summary.Cell index={0}>
+                                    <b>GRAND TOTAL</b>
+                                </Table.Summary.Cell>
+
+                                <Table.Summary.Cell index={1} />
+                                <Table.Summary.Cell index={2} />
+                                <Table.Summary.Cell index={3} />
+                                <Table.Summary.Cell index={4} />
+                                <Table.Summary.Cell index={5} />
+                                <Table.Summary.Cell index={6} />
+                                <Table.Summary.Cell index={7} />
+
+                                <Table.Summary.Cell index={8} colSpan={6} align="right">
+                                    <b>
+                                        Kredit : {RupiahFormat(totalDebet)}
+                                    </b>
+                                </Table.Summary.Cell>
+
+                                <Table.Summary.Cell index={14} colSpan={3} align="right">
+                                    <b>
+                                        Debet : {RupiahFormat(totalKredit)}
+                                    </b>
+                                </Table.Summary.Cell>
+                            </Table.Summary.Row>
+                        </Table.Summary>
+                    )}
                 />
             </Card>
         </AuthenticatedLayout>
