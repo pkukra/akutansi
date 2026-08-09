@@ -5,9 +5,134 @@ namespace App\Repositories\Akutansi;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Date;
+use Stringable;
 
 class PendapatanRajalRepository
 {
+    public function listJurnalPendapatan(string $tanggal_awal, string $tanggal_akhir, string $noTransaksi = '')
+    {
+        // =========================
+        // PARENT
+        // =========================
+        $query = DB::connection('sqlsrvsimrs')
+            ->table('PASIEN_RUJUKAN')
+            ->select('FRPNOTRANSAKSIKJ', 'FRPUNIT', 'FRPDOKTER_ID', 'FRPPASIEN_ID', 'FRPCUSTOMER_ID', 'NOSEP_NOW AS SEP')
+            ->when($noTransaksi, function ($query) use ($noTransaksi) {
+                return $query->where(
+                    'PASIEN_RUJUKAN.FRPNOTRANSAKSIKJ',
+                    $noTransaksi
+                );
+            })
+            ->when(
+                $tanggal_awal && $tanggal_akhir,
+                function ($query) use ($tanggal_awal, $tanggal_akhir) {
+                    return $query->whereBetween(
+                        'PASIEN_RUJUKAN.FRPTGL',
+                        [
+                            $tanggal_awal . ' 00:00:00',
+                            $tanggal_akhir . ' 23:59:59',
+                        ]
+                    );
+                }
+            );
+
+        $data = $query->get();
+
+        // Kalau tidak ada data
+        if ($data->isEmpty()) {
+            return (object) [
+                'total' => 0,
+                'data'  => collect(),
+            ];
+        }
+
+        // =========================
+        // AMBIL SEMUA ID TRANSAKSI
+        // =========================
+        $noTransaksiArr = $data
+            ->pluck('FRPNOTRANSAKSIKJ')
+            ->filter()
+            ->unique()
+            ->values();
+
+        // =========================
+        // CHILD
+        // =========================
+        $children = DB::connection('sqlsrvsimrs')
+            ->table('TRANSAKSIPASIEND')
+            ->whereIn('FDTNO_TRANSAKSI', $noTransaksiArr)
+            ->select(
+                'FDTNO_TRANSAKSI',
+                'FDTNOMER',
+                'FDTKDPRODUKN',
+                'FMPPRODUKN',
+                
+                DB::raw("
+                    CASE
+                        WHEN FRPCUSTOMER_ID = 'X001'
+                            THEN COA_RJ_UMUM
+
+                        WHEN FRPCUSTOMER_ID IN ('X002', 'X003')
+                            THEN COA_RJ_BPJS
+
+                        ELSE COA_RJ_ASURANSI
+                    END AS COA
+                "),
+                'ACCOUNT.DESCRIPTION AS ACCOUNT_DESCRIPTION',
+                
+                'FDTKD_PRODUK',
+                'FDTQTY',
+                'FDTDEBET',
+                'FDTKREDIT',
+                'FDTJENISTRANSAKSI',
+            )
+            ->leftJoin(
+                'PASIEN_RUJUKAN',
+                'FRPNOTRANSAKSIKJ',
+                '=',
+                'FDTNO_TRANSAKSI'
+            )
+            ->leftJoin('PRODUK', 'FDTKD_PRODUK', '=', 'FMPPRODUK_ID')
+
+            // ACCOUNT berdasarkan customer
+            ->leftJoin('ACCOUNT', function ($join) {
+                $join->on(
+                    'ACCOUNT',
+                    '=',
+                    DB::raw("
+                CASE
+                    WHEN FRPCUSTOMER_ID = 'X001'
+                        THEN COA_RJ_UMUM
+
+                    WHEN FRPCUSTOMER_ID IN ('X002', 'X003')
+                        THEN COA_RJ_BPJS
+
+                    ELSE COA_RJ_ASURANSI
+                END
+            ")
+                );
+            })
+
+            ->get()
+            ->groupBy('FDTNO_TRANSAKSI');
+
+        // =========================
+        // GABUNGKAN CHILD KE PARENT
+        // =========================
+        $data->transform(function ($item) use ($children) {
+            $item->details = $children
+                ->get($item->FRPNOTRANSAKSIKJ, collect())
+                ->values();
+            return $item;
+        });
+
+        return (object) [
+            'total' => $data->count(),
+            'data'  => $data,
+        ];
+    }
+
     public function listPasienRujukan(
         $dokter = null,
         $poli = null,

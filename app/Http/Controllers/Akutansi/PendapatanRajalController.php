@@ -11,11 +11,11 @@ use App\Repositories\Akutansi\PendapatanRajalRepository;
 
 class PendapatanRajalController extends Controller
 {
-    protected $rajalRepo;
+    protected $pendRajalRepo;
 
-    public function __construct(PendapatanRajalRepository $rajalRepo)
+    public function __construct(PendapatanRajalRepository $pendRajalRepo)
     {
-        $this->rajalRepo = $rajalRepo;
+        $this->pendRajalRepo = $pendRajalRepo;
     }
 
     public function index()
@@ -43,7 +43,7 @@ class PendapatanRajalController extends Controller
         $page = (int) $request->get('page', 1);
         $per_page = (int) $request->get('per_page', 20);
 
-        $data = $this->rajalRepo->listPasienRujukan(
+        $data = $this->pendRajalRepo->listPasienRujukan(
             $dokter,
             $poli,
             $payor,
@@ -64,5 +64,36 @@ class PendapatanRajalController extends Controller
     public function pendapatan_rajal_jurnal_index()
     {
         return Inertia::render('Akutansi/PendapatanRajal/ListJurnalPendapatan');
+    }
+
+    public function pendapatan_rajal_jurnal_data(Request $request)
+    {
+        $dokter = $request->get('dokter');
+        $poli = $request->get('poli');
+        $payor = $request->get('payor');
+        $kasir = $request->get('kasir');
+
+        $noTransaksi = $request->get('no_transaksi') ?? '';
+
+        $tanggal_awal = $request->get(
+            'tanggal_awal',
+            Carbon::today()->subDays(6)->format('Y-m-d')
+        );
+
+        $tanggal_akhir = $request->get(
+            'tanggal_akhir',
+            Carbon::today()->format('Y-m-d')
+        );
+
+        $page = (int) $request->get('page', 1);
+        $per_page = (int) $request->get('per_page', 20);
+
+        $data = $this->pendRajalRepo->listJurnalPendapatan($tanggal_awal, $tanggal_akhir, $noTransaksi);
+
+        return response()->json([
+            'status' => 'ok',
+            'data' => $data->data,
+            'count' => $data->total,
+        ]);
     }
 }
