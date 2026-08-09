@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import { Head } from "@inertiajs/react";
 import {
@@ -15,6 +15,7 @@ const { RangePicker } = DatePicker;
 import "./ListJurnalPendapatan.css";
 import axios from "axios";
 import dayjs from "dayjs";
+dayjs.locale("id");
 
 const RupiahFormat = (x) => {
     const number = Number(x || 0);
@@ -216,13 +217,15 @@ export default function Index({ auth }) {
         dataList.forEach((transaksi, transaksiIndex) => {
             const details = transaksi?.details || [];
 
-            // Group COA di dalam transaksi yang sama
+            // =====================================================
+            // GROUP COA DALAM SATU TRANSAKSI
+            // =====================================================
+
             const grouped = {};
 
             details.forEach((detail) => {
                 const coa = detail?.COA || "";
 
-                // COA kosong untuk transaksi KR
                 const key =
                     coa ||
                     `KR_${transaksiIndex}`;
@@ -251,9 +254,30 @@ export default function Index({ auth }) {
 
             const groupedArray = Object.values(grouped);
 
+            // =====================================================
+            // TOTAL UNTUK TRANSAKSI INI
+            // =====================================================
+
+            const transactionDebit = groupedArray.reduce(
+                (total, item) =>
+                    total + Number(item.debit || 0),
+                0
+            );
+
+            const transactionKredit = groupedArray.reduce(
+                (total, item) =>
+                    total + Number(item.kredit || 0),
+                0
+            );
+
+            // =====================================================
+            // DETAIL JURNAL
+            // =====================================================
+
             groupedArray.forEach((item, index) => {
                 result.push({
-                    key: `${transaksiIndex}-${index}`,
+                    key: `${transaksiIndex}-detail-${index}`,
+
                     tanggal:
                         transaksi?.TANGGAL ||
                         transaksi?.tanggal ||
@@ -264,15 +288,47 @@ export default function Index({ auth }) {
 
                     noBukti:
                         transaksi?.FRPNOTRANSAKSIKJ || "",
+
                     kodeAkun: item.coa || "",
+
                     namaAkun: item.account || "",
                     debit: item.debit,
                     kredit: item.kredit,
-                    // nomor kelompok transaksi
+
                     transaksiIndex: transaksiIndex,
-                    // baris pertama transaksi
+
                     firstRow: index === 0,
+
+                    isTotalRow: false,
                 });
+            });
+
+            // =====================================================
+            // BARIS TOTAL TRANSAKSI
+            // =====================================================
+
+            result.push({
+                key: `${transaksiIndex}-total`,
+
+                tanggal: "",
+
+                noBukti: "",
+
+                kodeAkun: "",
+
+                namaAkun: "TOTAL",
+
+                keterangan: "",
+
+                debit: transactionDebit,
+
+                kredit: transactionKredit,
+
+                transaksiIndex: transaksiIndex,
+
+                firstRow: false,
+
+                isTotalRow: true,
             });
         });
 
@@ -306,6 +362,7 @@ export default function Index({ auth }) {
             dataIndex: "tanggal",
             key: "tanggal",
             width: 120,
+
             render: (value, record) =>
                 record.firstRow ? value : "",
         },
@@ -315,6 +372,7 @@ export default function Index({ auth }) {
             dataIndex: "noBukti",
             key: "noBukti",
             width: 180,
+
             render: (value, record) =>
                 record.firstRow ? value : "",
         },
@@ -331,6 +389,13 @@ export default function Index({ auth }) {
             dataIndex: "namaAkun",
             key: "namaAkun",
             width: 280,
+
+            render: (value, record) =>
+                record.isTotalRow ? (
+                    <strong>TOTAL</strong>
+                ) : (
+                    value
+                ),
         },
 
         {
@@ -338,6 +403,35 @@ export default function Index({ auth }) {
             dataIndex: "keterangan",
             key: "keterangan",
             width: 300,
+
+            render: (value, record) => {
+                if (!record.isTotalRow) {
+                    return value;
+                }
+
+                const debit = Number(record.debit || 0);
+                const kredit = Number(record.kredit || 0);
+
+                if (debit === kredit) {
+                    return (
+                        <strong style={{ color: "#52c41a" }}>
+                            ✓ Balance
+                        </strong>
+                    );
+                }
+
+                return (
+                    <strong style={{ color: "#ff4d4f" }}>
+                        ⚠ Tidak Balance
+                        {" ("}
+                        Selisih:{" "}
+                        {RupiahFormat(
+                            Math.abs(debit - kredit)
+                        )}
+                        {")"}
+                    </strong>
+                );
+            },
         },
 
         {
@@ -346,10 +440,19 @@ export default function Index({ auth }) {
             key: "debit",
             width: 160,
             align: "right",
-            render: (value) =>
-                Number(value || 0) > 0
-                    ? RupiahFormat(value)
-                    : "",
+
+            render: (value, record) =>
+                record.isTotalRow ? (
+                    <strong>
+                        {Number(value || 0) > 0
+                            ? RupiahFormat(value)
+                            : ""}
+                    </strong>
+                ) : (
+                    Number(value || 0) > 0
+                        ? RupiahFormat(value)
+                        : ""
+                ),
         },
 
         {
@@ -358,12 +461,25 @@ export default function Index({ auth }) {
             key: "kredit",
             width: 160,
             align: "right",
-            render: (value) =>
-                Number(value || 0) > 0
-                    ? RupiahFormat(value)
-                    : "",
+
+            render: (value, record) =>
+                record.isTotalRow ? (
+                    <strong>
+                        {Number(value || 0) > 0
+                            ? RupiahFormat(value)
+                            : ""}
+                    </strong>
+                ) : (
+                    Number(value || 0) > 0
+                        ? RupiahFormat(value)
+                        : ""
+                ),
         },
     ];
+
+    useEffect(() => {
+        fetchDataList(initialPage, initialPerPage);
+    }, []);
 
     // =========================================================
     // RETURN
@@ -478,11 +594,16 @@ export default function Index({ auth }) {
                 ====================================================== */}
 
                 <p>
-                    Halaman: {page} |
-                    Per Halaman:{" "}
-                    {perPage} | Total
-                    data:{" "}
-                    {totalData}.
+                    Periode:{" "}
+                    <strong>
+                        {tanggalRange?.[0]?.format("DD-MM-YYYY")}
+                    </strong>
+                    {" s/d "}
+                    <strong>
+                        {tanggalRange?.[1]?.format("DD-MM-YYYY")}
+                    </strong>
+                    {" | "}
+                    Total data: <strong>{totalData}</strong>
                 </p>
 
                 {/* =====================================================
