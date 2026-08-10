@@ -12,6 +12,8 @@ import {
 } from "antd";
 const { RangePicker } = DatePicker;
 
+import ListJurnalPendapatanModalDetail from "./ListJurnalPendapatanModalDetail";
+
 import "./ListJurnalPendapatan.css";
 import axios from "axios";
 import dayjs from "dayjs";
@@ -388,7 +390,7 @@ export default function Index({ auth }) {
                 if (record.firstRow) {
                     return (
                         <small>
-                            {value} / {record?.pasienId}
+                            <ListJurnalPendapatanModalDetail>{value}</ListJurnalPendapatanModalDetail> / {record?.pasienId}
                         </small>
                     );
                 }
