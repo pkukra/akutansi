@@ -62,6 +62,30 @@ const Index = ({ children }) => {
         return;
     }
 
+    const totalDebet = data?.reduce(
+        (total, item) =>
+            total +
+            (item.details || []).reduce(
+                (sum, detail) =>
+                    sum + Number(detail.FDTDEBET || 0),
+                0
+            ),
+        0
+    );
+
+    const totalKredit = data?.reduce(
+        (total, item) =>
+            total +
+            (item.details || []).reduce(
+                (sum, detail) =>
+                    sum + Number(detail.FDTKREDIT || 0),
+                0
+            ),
+        0
+    );
+
+    const isBalance = totalDebet === totalKredit;
+
     return (
         <>
             <a onClick={handleModalOpen}>
@@ -112,6 +136,24 @@ const Index = ({ children }) => {
 
                                 <Descriptions.Item label="SEP">
                                     {item.SEP || "-"}
+                                </Descriptions.Item>
+
+                                <Descriptions.Item label="Status Balance">
+                                    <Tag color={isBalance ? "green" : "red"}>
+                                        {isBalance ? "BALANCE" : "TIDAK BALANCE"}
+                                    </Tag>
+                                </Descriptions.Item>
+
+                                <Descriptions.Item label="Total Kredit">
+                                    <Text strong>
+                                        {totalDebet.toLocaleString("id-ID")}
+                                    </Text>
+                                </Descriptions.Item>
+
+                                <Descriptions.Item label="Total Debet">
+                                    <Text strong>
+                                        {totalKredit.toLocaleString("id-ID")}
+                                    </Text>
                                 </Descriptions.Item>
                             </Descriptions>
 
