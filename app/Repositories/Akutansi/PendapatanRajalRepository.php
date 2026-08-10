@@ -10,14 +10,14 @@ use Stringable;
 
 class PendapatanRajalRepository
 {
-    public function listJurnalPendapatan(string $tanggal_awal, string $tanggal_akhir, string $noTransaksi = '')
+    public function listJurnalPendapatan(string $tanggal_awal = '', string $tanggal_akhir = '', string $noTransaksi = '')
     {
         // =========================
         // PARENT
         // =========================
         $query = DB::connection('sqlsrvsimrs')
             ->table('PASIEN_RUJUKAN')
-            ->select('FRPNOTRANSAKSIKJ', 'FRPUNIT', 'FRPDOKTER_ID', 'FRPPASIEN_ID', 'FRPCUSTOMER_ID','CUSTOMER.NAME AS CUSTOMER_NAME', 'NOSEP_NOW AS SEP')
+            ->select('FRPNOTRANSAKSIKJ', 'FRPUNIT', 'FRPDOKTER_ID', 'FRPPASIEN_ID', 'FRPCUSTOMER_ID', 'CUSTOMER.NAME AS CUSTOMER_NAME', 'NOSEP_NOW AS SEP')
             ->leftJoin(
                 'CUSTOMER',
                 'CUSID',
@@ -73,7 +73,7 @@ class PendapatanRajalRepository
                 'FDTNOMER',
                 'FDTKDPRODUKN',
                 'FMPPRODUKN',
-                
+
                 DB::raw("
                     CASE
                         WHEN FRPCUSTOMER_ID = 'X001'
@@ -86,7 +86,7 @@ class PendapatanRajalRepository
                     END AS COA
                 "),
                 'ACCOUNT.DESCRIPTION AS ACCOUNT_DESCRIPTION',
-                
+
                 'FDTKD_PRODUK',
                 'FDTQTY',
                 'FDTDEBET',

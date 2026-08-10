@@ -11,10 +11,6 @@ const Index = ({ children }) => {
         setLoadingData(true);
 
         const paramObj = {
-            page: 1,
-            per_page: 1000,
-            tanggal_awal: dayjs().format("YYYY-MM-DD"),
-            tanggal_akhir: dayjs().format("YYYY-MM-DD"),
             no_transaksi,
         };
 
