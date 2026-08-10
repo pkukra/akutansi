@@ -94,7 +94,7 @@ const Index = ({ children }) => {
 
             <Modal
                 destroyOnClose
-                title={"Detail Transaksi " + children}
+                title='Detail Transaksi'
                 open={modalOpen}
                 onCancel={() => setModalOpen(false)}
                 footer={null}
@@ -112,12 +112,12 @@ const Index = ({ children }) => {
                             >
                                 <Descriptions.Item label="No. Transaksi">
                                     <Text strong>
-                                        {item.FRPNOTRANSAKSIKJ}
+                                        {item.FRPNOTRANSAKSIKJ} / {item.FRPPASIEN_ID}
                                     </Text>
                                 </Descriptions.Item>
 
                                 <Descriptions.Item label="Unit">
-                                    {item.FRPUNIT}
+                                    <small>{item.FMPKLINIKN}</small>
                                 </Descriptions.Item>
 
                                 <Descriptions.Item label="Customer">
@@ -127,7 +127,7 @@ const Index = ({ children }) => {
                                 </Descriptions.Item>
 
                                 <Descriptions.Item label="Dokter">
-                                    {item.FRPDOKTER_ID}
+                                    <small>{item.FMDDOKTERN}</small>
                                 </Descriptions.Item>
 
                                 <Descriptions.Item label="Pasien">
@@ -223,25 +223,7 @@ const Index = ({ children }) => {
                                             Number(value).toLocaleString(
                                                 "id-ID"
                                             ),
-                                    },
-                                    {
-                                        title: "Jenis",
-                                        dataIndex:
-                                            "FDTJENISTRANSAKSI",
-                                        width: 80,
-                                        align: "center",
-                                        render: (value) => (
-                                            <Tag
-                                                color={
-                                                    value === "DB"
-                                                        ? "green"
-                                                        : "red"
-                                                }
-                                            >
-                                                {value}
-                                            </Tag>
-                                        ),
-                                    },
+                                    }
                                 ]}
                             />
                         </div>

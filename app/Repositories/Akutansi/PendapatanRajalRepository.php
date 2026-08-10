@@ -17,12 +17,24 @@ class PendapatanRajalRepository
         // =========================
         $query = DB::connection('sqlsrvsimrs')
             ->table('PASIEN_RUJUKAN')
-            ->select('FRPNOTRANSAKSIKJ', 'FRPUNIT', 'FRPDOKTER_ID', 'FRPPASIEN_ID', 'FRPCUSTOMER_ID', 'CUSTOMER.NAME AS CUSTOMER_NAME', 'NOSEP_NOW AS SEP')
+            ->select('FRPNOTRANSAKSIKJ', 'FRPUNIT', 'FRPDOKTER_ID', 'FRPPASIEN_ID', 'FRPCUSTOMER_ID', 'CUSTOMER.NAME AS CUSTOMER_NAME', 'NOSEP_NOW AS SEP', 'FMDDOKTERN', 'FMPKLINIKN')
             ->leftJoin(
                 'CUSTOMER',
                 'CUSID',
                 '=',
                 'FRPCUSTOMER_ID'
+            )
+            ->leftJoin(
+                'DOKTER',
+                'FRPDOKTER_ID',
+                '=',
+                'FMDDOKTER_ID'
+            )
+            ->leftJoin(
+                'POLIKLINIK',
+                'FRPUNIT',
+                '=',
+                'FMPKLINIK_ID'
             )
             ->when($noTransaksi, function ($query) use ($noTransaksi) {
                 return $query->where(
@@ -119,7 +131,7 @@ class PendapatanRajalRepository
             ")
                 );
             })
-
+            ->orderBy('FDTNOMER')
             ->get()
             ->groupBy('FDTNO_TRANSAKSI');
 
