@@ -277,8 +277,8 @@ export default function Index({ auth }) {
             groupedArray.forEach((item, index) => {
                 result.push({
                     key: `${transaksiIndex}-detail-${index}`,
-                    customerId:
-                        transaksi?.FRPCUSTOMER_ID || "",
+                    customerName:
+                        transaksi?.CUSTOMER_NAME || "",
                     pasienId:
                         transaksi?.FRPPASIEN_ID || "",
 
@@ -371,12 +371,13 @@ export default function Index({ auth }) {
 
             render: (value, record) =>
                 record.firstRow ? (
-                    <small>{value}</small>
+                    <small>
+                        {value ? dayjs(value).format("DD/MMMM/YYYY") : ""}
+                    </small>
                 ) : (
                     ""
                 ),
         },
-
         {
             title: "No. Bukti Jurnal",
             dataIndex: "noBukti",
@@ -399,7 +400,7 @@ export default function Index({ auth }) {
                 if (record.seccondRow) {
                     return (
                         <small>
-                            {record.customerId || ""}
+                            {record.customerName || ""}
                         </small>
                     );
                 }
@@ -644,11 +645,11 @@ export default function Index({ auth }) {
                 <p>
                     Periode:{" "}
                     <strong>
-                        {tanggalRange?.[0]?.format("DD-MM-YYYY")}
+                        {tanggalRange?.[0]?.format("DD/MM/YYYY")}
                     </strong>
                     {" s/d "}
                     <strong>
-                        {tanggalRange?.[1]?.format("DD-MM-YYYY")}
+                        {tanggalRange?.[1]?.format("DD/MM/YYYY")}
                     </strong>
                     {" | "}
                     Total data: <strong>{totalData}</strong>
