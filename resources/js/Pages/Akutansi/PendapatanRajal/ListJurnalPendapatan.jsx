@@ -545,7 +545,9 @@ export default function Index({ auth }) {
         >
             <Head title="Jurnal Pendapatan Rawat Jalan" />
 
-            <Card>
+            <Card
+                size={formSize} title="Jurnal Pendapatan Rajal"
+            >
 
                 {/* =====================================================
                     FILTER
