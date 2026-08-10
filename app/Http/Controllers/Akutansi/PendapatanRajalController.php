@@ -81,12 +81,14 @@ class PendapatanRajalController extends Controller
 
         if ($tanggal_awal && !preg_match('/^\d{4}-\d{2}-\d{2}$/', $tanggal_awal)) {
             return response()->json([
+                'status'=>'nok',
                 'message' => 'Format tanggal awal harus YYYY-MM-DD'
             ], 422);
         }
 
         if ($tanggal_akhir && !preg_match('/^\d{4}-\d{2}-\d{2}$/', $tanggal_akhir)) {
             return response()->json([
+                'status'=>'nok',
                 'message' => 'Format tanggal akhir harus YYYY-MM-DD'
             ], 422);
         }
