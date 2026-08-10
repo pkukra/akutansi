@@ -476,7 +476,7 @@ export default function Index({ auth }) {
         },
 
         {
-            title: "Debit (Rp)",
+            title: "Kredit (Rp)",
             dataIndex: "debit",
             key: "debit",
             width: 160,
@@ -501,7 +501,7 @@ export default function Index({ auth }) {
         },
 
         {
-            title: "Kredit (Rp)",
+            title: "Debet (Rp)",
             dataIndex: "kredit",
             key: "kredit",
             width: 160,
