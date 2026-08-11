@@ -10,7 +10,7 @@ import {
     Input,
     Select,
     Typography,
-    DatePicker, Grid
+    DatePicker, Grid, message
 } from "antd";
 
 const { useBreakpoint } = Grid;
@@ -77,7 +77,21 @@ export default function Index({ auth }) {
     };
 
     const fetchDataList = async (pageVal = page, perPageVal = perPage) => {
+        // Validasi range tanggal
+        if (tanggalRange?.[0] && tanggalRange?.[1]) {
+            const selisihHari = tanggalRange[1].diff(
+                tanggalRange[0],
+                "day",
+            );
+
+            if (selisihHari >= 31) {
+                message.error("Range tanggal maksimal 31 hari");
+                return;
+            }
+        }
+
         setLoading(true);
+
         try {
             const paramObj = {
                 page: pageVal,
