@@ -8,7 +8,7 @@ import {
     Row,
     Col,
     Typography,
-    DatePicker,
+    DatePicker, message
 } from "antd";
 const { RangePicker } = DatePicker;
 
@@ -143,6 +143,21 @@ export default function Index({ auth }) {
         pageVal = page,
         perPageVal = perPage
     ) => {
+        // Validasi maksimal 31 hari
+        if (tanggalRange?.[0] && tanggalRange?.[1]) {
+            const selisihHari = tanggalRange[1].diff(
+                tanggalRange[0],
+                "day"
+            );
+
+            if (selisihHari > 30) {
+                message.error(
+                    "Range tanggal maksimal 31 hari"
+                );
+                return;
+            }
+        }
+
         setLoading(true);
 
         try {
@@ -178,9 +193,7 @@ export default function Index({ auth }) {
                     }
                 );
 
-            console.log(
-                response?.data
-            );
+            console.log(response?.data);
 
             setDataList(
                 response?.data?.data || []
