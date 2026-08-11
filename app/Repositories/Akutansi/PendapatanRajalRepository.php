@@ -131,7 +131,7 @@ class PendapatanRajalRepository
             ")
                 );
             })
-            ->orderBy('FDTNOMER')
+            ->orderBy('FDTNOMER', 'DESC')
             ->get()
             ->groupBy('FDTNO_TRANSAKSI');
 
