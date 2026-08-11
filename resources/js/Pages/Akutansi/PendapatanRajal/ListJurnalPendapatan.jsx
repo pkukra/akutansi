@@ -478,31 +478,6 @@ export default function Index({ auth }) {
         },
 
         {
-            title: "Kredit (Rp)",
-            dataIndex: "debit",
-            key: "debit",
-            width: 160,
-            align: "right",
-
-            render: (value, record) =>
-                record.isTotalRow ? (
-                    <small>
-                        <strong>
-                            {Number(value || 0) > 0
-                                ? RupiahFormat(value)
-                                : ""}
-                        </strong>
-                    </small>
-                ) : (
-                    <small>
-                        {Number(value || 0) > 0
-                            ? RupiahFormat(value)
-                            : ""}
-                    </small>
-                ),
-        },
-
-        {
             title: "Debet (Rp)",
             dataIndex: "kredit",
             key: "kredit",
@@ -526,6 +501,31 @@ export default function Index({ auth }) {
                     </small>
                 ),
         },
+
+        {
+            title: "Kredit (Rp)",
+            dataIndex: "debit",
+            key: "debit",
+            width: 160,
+            align: "right",
+
+            render: (value, record) =>
+                record.isTotalRow ? (
+                    <small>
+                        <strong>
+                            {Number(value || 0) > 0
+                                ? RupiahFormat(value)
+                                : ""}
+                        </strong>
+                    </small>
+                ) : (
+                    <small>
+                        {Number(value || 0) > 0
+                            ? RupiahFormat(value)
+                            : ""}
+                    </small>
+                ),
+        }
     ];
 
     useEffect(() => {

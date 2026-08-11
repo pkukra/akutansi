@@ -301,12 +301,72 @@ export default function Index({ auth }) {
             ),
         },
         {
+            title: "Debet",
+            children: [
+                {
+                    title: "Kas",
+                    align: "right",
+                    width: 120,
+                    onHeaderCell: () => ({
+                        style: {
+                            textAlign: "center",
+                        },
+                    }),
+                    render: (_, record) => (
+                        <small>
+                            {RupiahFormat(record.KAS)}
+                        </small>
+                    ),
+                },
+                {
+                    title: "Bank",
+                    align: "right",
+                    width: 120,
+                    onHeaderCell: () => ({
+                        style: {
+                            textAlign: "center",
+                        },
+                    }),
+                    render: (_, record) => (
+                        <small>
+                            {RupiahFormat(record.BANK)}
+                        </small>
+                    ),
+                },
+                {
+                    title: "Piutang",
+                    align: "right",
+                    width: 120,
+                    onHeaderCell: () => ({
+                        style: {
+                            textAlign: "center",
+                        },
+                    }),
+                    render: (_, record) => (
+                        <small>
+                            {RupiahFormat(record.PIUTANG)}
+                        </small>
+                    ),
+                },
+            ],
+        },
+        {
             title: "Kredit",
+            onHeaderCell: () => ({
+                style: {
+                    textAlign: "center",
+                },
+            }),
             children: [
                 {
                     title: "Pendaftaran",
                     align: "right",
                     width: 120,
+                    onHeaderCell: () => ({
+                        style: {
+                            textAlign: "center",
+                        },
+                    }),
                     render: (_, record) => (
                         <small>
                             {RupiahFormat(record.PENDAFTARAN)}
@@ -317,6 +377,11 @@ export default function Index({ auth }) {
                     title: "Jasa Medis",
                     align: "right",
                     width: 120,
+                    onHeaderCell: () => ({
+                        style: {
+                            textAlign: "center",
+                        },
+                    }),
                     render: (_, record) => (
                         <small>
                             {RupiahFormat(record.JASA_MEDIS)}
@@ -327,6 +392,11 @@ export default function Index({ auth }) {
                     title: "Obat",
                     align: "right",
                     width: 120,
+                    onHeaderCell: () => ({
+                        style: {
+                            textAlign: "center",
+                        },
+                    }),
                     render: (_, record) => (
                         <small>
                             {RupiahFormat(record.OBAT)}
@@ -337,6 +407,11 @@ export default function Index({ auth }) {
                     title: "Lab",
                     align: "right",
                     width: 120,
+                    onHeaderCell: () => ({
+                        style: {
+                            textAlign: "center",
+                        },
+                    }),
                     render: (_, record) => (
                         <small>
                             {RupiahFormat(record.LAB)}
@@ -347,6 +422,11 @@ export default function Index({ auth }) {
                     title: "Radiologi",
                     align: "right",
                     width: 120,
+                    onHeaderCell: () => ({
+                        style: {
+                            textAlign: "center",
+                        },
+                    }),
                     render: (_, record) => (
                         <small>
                             {RupiahFormat(record.RADIOLOGI)}
@@ -374,43 +454,7 @@ export default function Index({ auth }) {
                     },
                 },
             ],
-        },
-
-        {
-            title: "Debet",
-            children: [
-                {
-                    title: "Kas",
-                    align: "right",
-                    width: 120,
-                    render: (_, record) => (
-                        <small>
-                            {RupiahFormat(record.KAS)}
-                        </small>
-                    ),
-                },
-                {
-                    title: "Bank",
-                    align: "right",
-                    width: 120,
-                    render: (_, record) => (
-                        <small>
-                            {RupiahFormat(record.BANK)}
-                        </small>
-                    ),
-                },
-                {
-                    title: "Piutang",
-                    align: "right",
-                    width: 120,
-                    render: (_, record) => (
-                        <small>
-                            {RupiahFormat(record.PIUTANG)}
-                        </small>
-                    ),
-                },
-            ],
-        },
+        }
     ]
 
     return (
@@ -519,6 +563,7 @@ export default function Index({ auth }) {
                 </p>
 
                 <Table
+                    bordered
                     scroll={{
                         x: 2000,
                         y: scrollY,
