@@ -6,8 +6,6 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\Cesemix\RanapMonitController;
 use App\Http\Middleware\CheckRole;
-
-
 use App\Http\Controllers\ICDImportController;
 
 Route::get('/', function () {
