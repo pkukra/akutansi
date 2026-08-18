@@ -17,11 +17,43 @@ class PendapatanRajalExport implements FromCollection, WithHeadings, WithMapping
 
     private function valueOf($row, string $key)
     {
-        if (is_array($row)) {
-            return $row[$key] ?? null;
+        $candidates = [$key];
+
+        $map = [
+            'FRPTGL' => ['FRPTGL', 'TANGGAL'],
+            'FRPPASIEN_ID' => ['FRPPASIEN_ID', 'NO_RM'],
+            'FRPNOTRANSAKSIKJ' => ['FRPNOTRANSAKSIKJ', 'NO_TRANSAKSI'],
+            'NAMAPASIEN' => ['NAMAPASIEN', 'NAMA_PASIEN'],
+            'FMDDOKTERN' => ['FMDDOKTERN', 'DOKTER_NAMA', 'DOKTER'],
+            'PENJAMIN' => ['PENJAMIN', 'NAMA_PENJAMIN'],
+            'FMPKLINIKN' => ['FMPKLINIKN', 'POLI_NAMA', 'POLI'],
+            'KASIR' => ['KASIR', 'USERRS'],
+            'TOTAL_BIAYA' => ['TOTAL_BIAYA', 'TOTALBIAYA'],
+            'PENDAFTARAN' => ['PENDAFTARAN', 'PENDAFTARAN_RJ'],
+            'JASA_MEDIS' => ['JASA_MEDIS', 'JASA_MEDIS_RJ'],
+            'OBAT' => ['OBAT', 'OBAT_RJ'],
+            'LAB' => ['LAB', 'LAB_RJ'],
+            'RADIOLOGI' => ['RADIOLOGI', 'RADIOLOGI_RJ'],
+            'KAS' => ['KAS', 'KAS_RJ'],
+            'BANK' => ['BANK', 'BANK_RJ'],
+            'PIUTANG' => ['PIUTANG', 'PIUTANG_RJ'],
+        ];
+
+        if (isset($map[$key])) {
+            $candidates = $map[$key];
         }
 
-        return $row->{$key} ?? null;
+        foreach ($candidates as $candidate) {
+            if (is_array($row) && array_key_exists($candidate, $row)) {
+                return $row[$candidate];
+            }
+
+            if (is_object($row) && property_exists($row, $candidate)) {
+                return $row->{$candidate};
+            }
+        }
+
+        return null;
     }
 
     public function collection()
