@@ -158,6 +158,20 @@ export default function Index({ auth }) {
         window.location.replace(route("akt.pendapatan_rajal.index"));
     };
 
+    const handleExport = () => {
+        const query = new URLSearchParams({
+            dokter: DokterFilter,
+            poli: PoliFilter,
+            payor: PayorFilter,
+            kasir: KasirFilter,
+            tanggal_awal: tanggalRange?.[0]?.format("YYYY-MM-DD") || "",
+            tanggal_akhir: tanggalRange?.[1]?.format("YYYY-MM-DD") || "",
+        }).toString();
+
+        const url = `${route("akt.pendapatan_rajal.export")}${query ? `?${query}` : ""}`;
+        window.open(url, "_blank");
+    };
+
     useEffect(() => {
         fetchDataList();
     }, []);
@@ -567,6 +581,19 @@ export default function Index({ auth }) {
                             size={formSize}
                         >
                             Reset
+                        </Button>
+                    </Col>
+
+                    <Col span={2}>
+                        <Typography.Text>&nbsp;</Typography.Text>
+                        <Button
+                            block
+                            type="primary"
+                            ghost
+                            onClick={handleExport}
+                            size={formSize}
+                        >
+                            Download Excel
                         </Button>
                     </Col>
                 </Row>

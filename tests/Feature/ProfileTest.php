@@ -3,7 +3,9 @@
 namespace Tests\Feature;
 
 use App\Models\User;
+use App\Repositories\Akutansi\PendapatanRajalRepository;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Mockery;
 use Tests\TestCase;
 
 class ProfileTest extends TestCase
@@ -19,6 +21,49 @@ class ProfileTest extends TestCase
             ->get('/profile');
 
         $response->assertOk();
+    }
+
+    public function test_pendapatan_rajal_export_route_returns_excel_with_filters(): void
+    {
+        $user = User::factory()->create();
+
+        $repository = Mockery::mock(PendapatanRajalRepository::class);
+        $repository->shouldReceive('listPasienRujukan')
+            ->once()
+            ->with('D01', 'P01', 'PAYOR1', 'K01', '2026-08-01', '2026-08-10', 1, null)
+            ->andReturn((object) [
+                'total' => 1,
+                'data' => collect([
+                    [
+                        'FRPTGL' => '2026-08-01',
+                        'FRPPASIEN_ID' => '001',
+                        'NAMAPASIEN' => 'Test Pasien',
+                        'FMDDOKTERN' => 'Dokter A',
+                        'PENJAMIN' => 'BPJS',
+                        'FMPKLINIKN' => 'Poli A',
+                        'KASIR' => 'Kasir A',
+                        'TOTAL_BIAYA' => 100000,
+                        'KAS' => 100000,
+                        'BANK' => 0,
+                        'PIUTANG' => 0,
+                        'PENDAFTARAN' => 0,
+                        'JASA_MEDIS' => 0,
+                        'OBAT' => 0,
+                        'LAB' => 0,
+                        'RADIOLOGI' => 0,
+                    ],
+                ]),
+            ]);
+
+        $this->app->instance(PendapatanRajalRepository::class, $repository);
+
+        $response = $this
+            ->actingAs($user)
+            ->get('/akutansi/pendapatan-rajal-export?dokter=D01&poli=P01&payor=PAYOR1&kasir=K01&tanggal_awal=2026-08-01&tanggal_akhir=2026-08-10');
+
+        $response
+            ->assertOk()
+            ->assertHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
     }
 
     public function test_profile_information_can_be_updated(): void

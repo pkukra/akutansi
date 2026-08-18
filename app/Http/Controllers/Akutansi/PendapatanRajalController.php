@@ -7,6 +7,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Carbon\Carbon;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\PendapatanRajalExport;
 use App\Repositories\Akutansi\PendapatanRajalRepository;
 
 class PendapatanRajalController extends Controller
@@ -59,6 +61,35 @@ class PendapatanRajalController extends Controller
             'data' => $data->data,
             'count' => $data->total,
         ]);
+    }
+
+    public function export(Request $request)
+    {
+        $dokter = $request->get('dokter');
+        $poli = $request->get('poli');
+        $payor = $request->get('payor');
+        $kasir = $request->get('kasir');
+
+        $tanggal_awal = $request->get('tanggal_awal', Carbon::today()->subDays(6)->format('Y-m-d'));
+        $tanggal_akhir = $request->get('tanggal_akhir', Carbon::today()->format('Y-m-d'));
+
+        $data = $this->pendRajalRepo->listPasienRujukan(
+            $dokter,
+            $poli,
+            $payor,
+            $kasir,
+            $tanggal_awal,
+            $tanggal_akhir,
+            1,
+            null
+        );
+
+        $filename = sprintf(
+            'pendapatan-rajal-%s.xlsx',
+            Carbon::now()->format('Ymd_His')
+        );
+
+        return Excel::download(new PendapatanRajalExport($data->data), $filename);
     }
 
     public function pendapatan_rajal_jurnal_index()

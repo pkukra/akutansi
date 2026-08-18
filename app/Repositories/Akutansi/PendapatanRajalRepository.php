@@ -538,26 +538,23 @@ class PendapatanRajalRepository
         | Data
         |--------------------------------------------------------------------------
         */
-        $data = $baseQuery
+        $query = $baseQuery
             ->select($select)
-
             ->orderBy(
                 'PASIEN_RUJUKAN.FRPTGL',
                 'desc'
             )
-
             ->orderBy(
                 'PASIEN_RUJUKAN.FRPJAM',
                 'desc'
-            )
+            );
 
-            ->limit($per_page)
+        if ($per_page !== null) {
+            $query->limit((int) $per_page)
+                ->offset((int) (($page - 1) * $per_page));
+        }
 
-            ->offset(
-                ($page - 1) * $per_page
-            )
-
-            ->get();
+        $data = $query->get();
 
         /*
         |--------------------------------------------------------------------------

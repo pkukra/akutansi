@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Log;
 Route::prefix('akutansi')->group(function () {
     Route::get('/pendapatan-rajal', [PendapatanRajalController::class, 'index'])->name('akt.pendapatan_rajal.index');
     Route::get('/pendapatan-rajal-data', [PendapatanRajalController::class, 'index_data'])->name('akt.pendapatan_rajal.index_data');
+    Route::get('/pendapatan-rajal-export', [PendapatanRajalController::class, 'export'])->name('akt.pendapatan_rajal.export');
 
     Route::get('/pendapatan-rajal-jurnal', [PendapatanRajalController::class, 'pendapatan_rajal_jurnal_index'])->name('akt.pendapatan_rajal_jurnal_index.index');
     Route::get('/pendapatan-rajal-jurnal-data', [PendapatanRajalController::class, 'pendapatan_rajal_jurnal_data'])->name('akt.pendapatan_rajal_jurnal_data');
