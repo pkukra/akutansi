@@ -1,0 +1,12 @@
+.ant-menu-inline .ant-menu-title-content {
+    white-space: normal !important;
+    line-height: 18px;
+}
+
+.ant-menu-inline .ant-menu-item,
+.ant-menu-inline .ant-menu-submenu-title {
+    height: auto !important;
+    min-height: 40px;
+    padding-top: 6px !important;
+    padding-bottom: 6px !important;
+}
