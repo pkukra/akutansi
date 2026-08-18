@@ -10,13 +10,6 @@ use App\Http\Middleware\CheckRole;
 
 use App\Http\Controllers\ICDImportController;
 
-Route::get('/icd-import', [ICDImportController::class, 'form']);
-Route::post('/icd-import', [ICDImportController::class, 'import'])->name('icd.import');
-
-Route::get('/db', function () {
-    return env('DB_SQLSIMRS_HOST') . ' <br> ' . env('DB_SQLEMR_HOST') . ' <br> ' . env('DB_HOST');
-});
-
 Route::get('/', function () {
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
@@ -25,13 +18,6 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-});
-
-Route::middleware('auth')->group(function () {
-    Route::get('/studentsdashboard', [StudentController::class, 'index'])->name('studentsdashboard.index');
-    Route::post('/addStudent', [StudentController::class, 'store'])->name('addStudent.store');
-    Route::patch('/updateStudent/{id}', [StudentController::class, 'update'])->name('updateStudent.update');
-    Route::delete('/deleteStudent/{id}', [StudentController::class, 'destroy'])->name('deleteStudent.destroy');
 });
 
 Route::prefix('casemix')->group(function () {
@@ -58,16 +44,5 @@ Route::prefix('casemix')->group(function () {
     });
 });
 
-Route::get('/hasil_lab', function () {
-    return response()->json([
-        'status' => "ok",
-        'data' => env("HASIL_LAB_URL"),
-    ]);
-})->name("common.lab_url");
-
-// Muat file routes rm.php
-require_once __DIR__ . '/rm.php';
-require_once __DIR__ . '/klaim.php';
 require_once __DIR__ . '/akutansi.php';
-
 require __DIR__ . '/auth.php';

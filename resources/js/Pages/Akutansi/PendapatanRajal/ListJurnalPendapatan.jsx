@@ -193,8 +193,6 @@ export default function Index({ auth }) {
                     }
                 );
 
-            console.log(response?.data);
-
             setDataList(
                 response?.data?.data || []
             );
