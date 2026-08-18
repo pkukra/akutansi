@@ -226,7 +226,7 @@ const items = [
     {
         key: "buku-besar",
         icon: <ReadOutlined />,
-        label: "BUKU Besar",
+        label: "BUKU BESAR",
         children: [
             {
                 key: "Sub-Sub-Buku-Besar",
@@ -243,6 +243,37 @@ const items = [
             {
                 key: "Mutasi Buku Besar",
                 label: "Mutasi Buku Besar",
+            },
+        ]
+    },
+    {
+        key: "buku-besar",
+        icon: <ReadOutlined />,
+        label: "LAPORAN KEUANGAN",
+        children: [
+            {
+                key: "NERACA-PERCOBAAN",
+                label: "NERACA PERCOBAAN",
+            },
+            {
+                key: "NERACA",
+                label: "NERACA",
+            },
+            {
+                key: "LABA-RUGI",
+                label: "LABA RUGI",
+            },
+            {
+                key: "Arus Kas Metode Langsung",
+                label: "Arus Kas Metode Langsung",
+            },
+            {
+                key: "Arus Kas Metode Tak Langsung",
+                label: "Arus Kas Metode Tak Langsung",
+            },
+            {
+                key: "PERUBAHAN EKUITAS",
+                label: "PERUBAHAN EKUITAS",
             },
         ]
     },
