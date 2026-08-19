@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { Link, usePage } from "@inertiajs/react";
 import {
+    WalletOutlined,
     UserOutlined,
     LineChartOutlined,
     HomeOutlined,
-    MonitorOutlined,
     PoweroffOutlined,
     ExperimentOutlined,
     AuditOutlined,
@@ -27,7 +27,7 @@ const items = [
     },
     {
         key: "keu-parent",
-        icon: <LineChartOutlined />,
+        icon: <WalletOutlined />,
         label: <a href={'#'}>KEUANGAN</a>,
         children: [
             {
@@ -247,8 +247,8 @@ const items = [
         ]
     },
     {
-        key: "buku-besar",
-        icon: <ReadOutlined />,
+        key: "laporan-keuangan",
+        icon: <LineChartOutlined />,
         label: "LAPORAN KEUANGAN",
         children: [
             {
