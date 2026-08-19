@@ -584,7 +584,7 @@ export default function Index({ auth }) {
                         </Button>
                     </Col>
 
-                    <Col span={2}>
+                    <Col span={3}>
                         <Typography.Text>&nbsp;</Typography.Text>
                         <Button
                             block
